@@ -9,7 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script type="module" src="script.js"></script>
 </head>
 <body>
 
@@ -24,10 +25,48 @@
     </div>
   </nav>
 
+<div style="display: flex; justify-content: flex-end; padding: 20px 5% 0 0;">
+    <button class="header-action-btn" onclick="toggleFormularioAdmin()" 
+        style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+        ➕ Administrar Oficinas
+    </button>
+</div>
+
   <header>
     <h1>Generador de Claves Corporativas</h1>
     <p class="subtitle">Crea usuarios y contraseñas automáticamente para cuentas corporativas y citas médicas</p>
   </header>
+
+<div id="modalAdmin" class="modal-overlay" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+    <div class="modal-content-custom" style="background:var(--glass-bg); padding:30px; border-radius:15px; width:90%; max-width:600px; border:1px solid var(--glass-border);">
+        <h3>⚙️ Panel de Administración SEDENA</h3>
+        <div style="margin: 15px 0;">
+      <div style="margin: 15px 0;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Selecciona para editar (o deja vacío para nuevo):</label>
+          <select id="selectorSedena" onchange="cargarEnAdmin(this.value)" 
+              style="width:100%; padding:10px; margin-top:5px; background:rgba(255,255,255,0.1); color:inherit; border:1px solid rgba(255,255,255,0.3); border-radius:8px; outline:none;">
+              
+              <option value="" style="color: #000;">-- NUEVA OFICINA --</option>
+          </select>
+      </div>
+      </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input type="text" id="admNumero" placeholder="Número Oficina" class="modal-input">
+            <input type="text" id="admNomen" placeholder="Nomenclatura" class="modal-input">
+            <input type="text" id="admNombre" placeholder="Nombre de Agencia" style="grid-column: span 2;" class="modal-input">
+            <select id="admEstatus" class="modal-input">
+                <option value="ACTIVA">ACTIVA</option>
+                <option value="INACTIVA">INACTIVA</option>
+            </select>
+        </div>
+        <div style="margin-top:20px; text-align:right;">
+            <button onclick="toggleFormularioAdmin()" style="padding:10px; background:none; color:inherit; border:none; cursor:pointer;">Cancelar</button>
+            <button id="btnGuardarSedena" onclick="guardarCambiosSedena()" style="padding:10px 20px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer;">💾 Guardar en GitHub</button>
+        </div>
+    </div>
+</div>
+
+
 
   <main class="container fade-in">
     <div class="card" role="region" aria-labelledby="cardTitle">
@@ -151,7 +190,7 @@
        © 2026 Generador Profesional — Desarrollado por ServiceDesk
     </footer>
 
-  <script src="script.js"></script>
+
 <script>
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');

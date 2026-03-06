@@ -335,3 +335,62 @@ footer{
   from { bottom: 30px; opacity: 1; }
   to { bottom: 0; opacity: 0; }
 }
+
+
+/* --- ESTILOS PARA EL BOTÓN DE ADMINISTRAR (CORREGIDO) --- */
+
+/* 1. Contenedor que empuja el botón a la derecha de forma segura */
+.admin-button-aligner {
+    display: flex;
+    justify-content: flex-end; /* Alinea a la derecha */
+    padding: 15px 5%; /* Margen lateral para que no toque el borde */
+    margin-top: 10px; /* Espacio respecto a la Navbar */
+    position: relative; /* Asegura que no se superponga */
+    z-index: 10; /* Lo mantiene por encima del fondo pero debajo de modales */
+}
+
+/* 2. El botón con el estilo visual exacto que pediste (Glassmorphism) */
+.glass-action-btn {
+    /* Estilos visuales idénticos a los que me pasaste */
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 12px; /* Redondeado idéntico */
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    
+    /* Efectos y transiciones */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px); /* Efecto de cristal esmerilado */
+    -webkit-backdrop-filter: blur(5px);
+}
+
+/* 3. Efectos al pasar el mouse (hover) */
+.glass-action-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    transform: translateY(-2px); /* Pequeña elevación */
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+.glass-action-btn:active {
+    transform: translateY(0);
+}
+
+/* 4. Ajuste para pantallas pequeñas (móviles) */
+@media (max-width: 600px) {
+    .admin-button-aligner {
+        justify-content: center; /* En móvil, centramos el botón */
+        padding: 10px;
+    }
+    .glass-action-btn {
+        width: 100%; /* El botón ocupa todo el ancho en móvil */
+        justify-content: center;
+    }
+}
+
