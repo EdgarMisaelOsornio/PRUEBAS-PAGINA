@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo.jpg">
+  <title>Oficinas E-Transporte | Service Desk</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+    
+    <div class="nav-right">
+        <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+            🏠 <span class="nav-text">Inicio</span>
+        </button>
+        <button class="dark-toggle" onclick="toggleDarkMode()" id="themeBtn">🌙</button>
+    </div>
+  </nav>
+
+  <header style="position: relative;">
+    <div class="header-content">
+      <h1>📂 Generador de Oficinas</h1>
+      <p class="subtitle">Crea, organiza y exporta tus listas de oficinas fácilmente</p>
+    </div>
+    
+    <button class="header-action-btn" onclick="toggleFormulario()">
+        ➕ Agregar Oficina
+    </button>
+  </header>
+
+
+
+<div id="secAgregarOficina" class="container manual-section" style="display: none;">
+  <h3>➕ Agregar o Editar Oficina</h3>
+  
+  <div class="input-group form-grid">
+    <div class="form-field">
+      <label for="newClave">Clave (Ej: 1234)</label>
+      <input type="text" id="newClave" placeholder="0000">
+    </div>
+
+    <div class="form-field">
+      <label for="newNombre">Nombre (Ej: CENTRAL)</label>
+      <input type="text" id="newNombre" placeholder="Nombre oficina">
+    </div>
+
+    <div class="form-field">
+      <label for="newNomenclatura">Nomenclatura (Ej: MXN)</label>
+      <input type="text" id="newNomenclatura" placeholder="3 letras">
+    </div>
+
+    <div class="form-field">
+      <label for="newDireccion">Dirección</label>
+      <select id="newDireccion" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <option value="">-- Cargando direcciones... --</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="buttons action-buttons">
+    <button class="success" onclick="guardarOficinaManual()">💾 Guardar Oficina</button>
+  </div>
+
+  <div style="margin-top: 15px;">
+    <button class="warning" onclick="mostrarBuscadorCorreccion()" style="font-size: 0.85rem; padding: 5px 10px;">
+        ⚠️ ¿Te equivocaste agregando una oficina? Presiona aquí
+    </button>
+  </div>
+</div>
+
+
+<div id="modalCorreccion" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close-modal" onclick="cerrarModal()">&times;</span>
+    
+    <div class="modal-header">
+      <h2>🛠️ Buscador de Corrección</h2>
+      <p>Busca la oficina que deseas editar y presiona "Corregir"</p>
+    </div>
+
+    <div class="modal-search-container">
+      <input type="text" id="buscadorModal" placeholder="🔍 Escribe nombre o clave para filtrar..." oninput="filtrarTablaModal()">
+    </div>
+    
+    <div class="table-container-modal">
+      <table class="manual-table">
+        <thead>
+          <tr>
+            <th>Clave</th>
+            <th>Nombre</th>
+            <th>Nomenclatura</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tablaModalBody">
+          </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+  <div id="modalConfirmacion" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px; text-align: center;">
+      <div class="modal-header">
+        <h2 style="color: var(--accent);">⚠️ Confirmación</h2>
+      </div>
+      <div id="confirmMensaje" style="margin: 20px 0; line-height: 1.6; text-align: left; font-size: 0.95rem;">
+        </div>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button id="btnConfirmarSi" class="success" style="padding: 10px 20px;">Sí, Sobrescribir</button>
+        <button id="btnConfirmarNo" class="warning" style="padding: 10px 20px; background: #666; border-color: #666;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalMensaje" class="modal" style="display: none;">
+  <div class="modal-content" style="max-width: 450px; text-align: center;">
+    <div id="mensajeIcono" style="font-size: 3.5rem; margin-bottom: 15px;"></div>
+    <h2 id="mensajeTitulo" style="margin-bottom: 15px; font-weight: 800;"></h2>
+    <div id="mensajeTexto" style="margin-bottom: 25px; line-height: 1.6;"></div>
+    <button onclick="cerrarMensaje()" class="primary" style="padding: 10px 40px; font-weight: bold;">Entendido</button>
+  </div>
+</div>
+
+
+
+  <main class="container fade-in">
+    <div class="form-group">
+      <label>Seleccionar Dirección</label>
+      <select id="filtroDireccion">
+          <option value="">-- Selecciona una Dirección --</option>
+      </select>
+    </div>
+
+    <button class="primary" onclick="agregarOficinasPorDireccion()">➕ Agregar Oficinas de la Dirección</button>
+    <br><br>
+
+  <div class="search-section" style="position: relative;"> 
+      <label>Buscar Oficina</label>
+      <input type="text" id="buscar" placeholder="Escribe nombre o clave..." autocomplete="off">
+      <div id="resultadosBusqueda" class="search-results"></div>
+  </div> 
+
+    <div class="form-section">
+      <div class="form-group">
+        <label>Lista de Oficinas <span>(una por línea)</span></label>
+        <textarea id="oficinas" rows="8" placeholder="Ejemplo: 0724"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Clave de usuario</label>
+          <input type="text" id="usuario" placeholder="Ejemplo: 132605">
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de puesto</label>
+          <select id="puesto">
+            <option>ADMINISTRATIVO RECAUDACION</option>
+            <option>AGENTES DE CALL CENTER</option>
+            <option>ANALISTA DE LOGISTICA</option>
+            <option>AUDITOR</option>
+            <option>AUXILIAR DE AREA CORPORATIVO</option>
+            <option>AUXILIAR DE NOMINAS</option>
+            <option>AUXILIAR DE SERVICIOS</option>
+            <option>AUXILIAR DE CUENTAS</option>
+            <option>AUXILIAR ADMINISTRATIVO</option>
+            <option>AUXILIAR CONTABLE</option>
+            <option>CAJERO RECAUDADOR</option>
+            <option>COORDINADOR COMERCIAL</option>
+            <option>COORDINADOR DE RECAUDACIONES</option>
+            <option>COORDINADOR OPERATIVO</option>
+            <option>DIRECTOR DE AREA CORPORATIVO</option>
+            <option>DIRECTOR OPERATIVO</option>
+            <option>ENCARGADO DE AREA CORPORATIVO</option>
+            <option>ENCARGADO DE VALORES</option>
+            <option>ENCARGADO IDEA</option>
+            <option>GERENTE COMERCIAL</option>
+            <option>GERENTE DE LOGISTICA</option>
+            <option>GERENTE DE RECAUDACION</option>
+            <option>GERENTE DE RECURSOS HUMANOS</option>
+            <option>GERENTE OPERATIVO</option>
+            <option>JEFE ADMINISTRATIVO</option>
+            <option>JEFE DE AUDITORIA</option>
+            <option>JEFE DE INFORMATICA</option>
+            <option>JEFE DE NOMINAS</option>
+            <option>JEFE DE OFICINA</option>
+            <option>JEFE DE PERSONAL</option>
+            <option>JEFE DE PRESTACIONES</option>
+            <option>JEFE DE RECAUDACION</option>
+            <option>JEFE DE RECURSOS HUMANOS</option>
+            <option>JEFE DE SERVICIOS</option>
+            <option>JEFE DE TAQUILLAS</option>
+            <option>PROMOTOR DE VENTAS</option>
+            <option>PROMOTOR DE VENTAS CALL CENTER</option>
+            <option>PROMOTOR DE VENTAS Y SERVICIOS</option>
+            <option>RECAUDADOR</option>
+            <option>SUPERVISOR DE CALL CENTER</option>
+            <option>SUPERVISOR SERVICIOS</option>
+          </select>
+        </div>
+      </div>
+
+      
+    <div class="buttons">
+      <button class="primary" onclick="generar()">✨ Generar</button>
+      <button class="success" onclick="descargarExcel()">📊 Descargar Excel</button>
+      <button class="success" onclick="xlsxOriginal()">📁 Archivo de las Oficinas </button>     
+      <button class="info" onclick="descargarWord()">📝 Descargar Word</button>
+      <button class="warning" onclick="irAPoliticas()">📋 Generar Políticas</button>       
+    </div>
+    </div>
+    
+
+    <div class="output">
+      <h3>📄 Resultado generado</h3>
+      <pre id="resultado"></pre>
+      <div id="errores" class="error"></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Generador Profesional — Desarrollado por ServiceDesk</p>
+  </footer>
+
+  <script type="module" src="./js/main.js"></script>
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('etransporte-theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeBtn').innerText = isDark ? "☀️" : "🌙";
+    }
+    if (localStorage.getItem('etransporte-theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeBtn').innerText = "☀️";
+    }
+  </script>
+</body>
+</html>

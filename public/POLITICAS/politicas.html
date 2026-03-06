@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/logo.jpg">
+  <title>Políticas | Service Desk</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+
+    <div class="nav-right">
+      <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+        🏠 <span class="nav-text">Inicio</span>
+      </button>
+
+      <button class="dark-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema">☀️</button>
+    </div>
+  </nav>
+  
+  <div class="wrap">
+
+    <div class="panel">
+      <h2>Captura de datos</h2>
+      
+      <div class="btnsTop">
+        <button class="ghost" type="button" onclick="addPage()">＋ Añadir pagina</button>
+        <button class="ghost" type="button" onclick="clearAll()">🧹 Limpiar</button>
+      </div>
+
+      <div class="forms" id="forms"></div>
+
+      <div class="btnsBottom">
+        <button class="primary" type="button" onclick="printDoc()">
+          🖨️ Imprimir / Guardar PDF
+        </button>
+      </div>
+      <div class="footer">© 2026 Generador Politicas — Desarrollado por ServiceDesk</div>
+    </div>
+
+
+        <div class="doc">
+        <div class="sheets" id="sheets"></div>
+        </div>
+
+        </div>
+
+          <template id="template-form-card">
+            <div class="formCard" id="card-{{id}}">
+              <div class="formHead" style="border-bottom: 1px solid var(--line); margin-bottom: 20px; padding-bottom: 10px;">
+                <div class="title" style="font-size: 16px;">Formato {{id}}</div>
+                <div class="miniBtns">
+                  <button class="mini ghost" type="button" onclick="duplicatePage('{{id}}')">Duplicar</button>
+                  <button class="mini danger" type="button" onclick="removePage('{{id}}')">Eliminar</button>
+                </div>
+              </div>
+
+    <label>Solicitante</label>
+    <input id="in-solicitante-{{id}}" oninput="syncPage('{{id}}')">
+
+    <label>Ticket</label>
+    <input id="in-ticket-{{id}}" oninput="syncPage('{{id}}')">
+
+    <label>Sistema</label>
+    <select id="in-sistema-{{id}}" onchange="syncPage('{{id}}')">
+      <option value="E-TRANSPORTE">E-TRANSPORTE</option>
+      <option value="AS400">AS400</option>
+      <option value="TPAK">TPAK</option>
+      <option value="CAD">CAD</option>
+      <option value="DORMITORIOS">DORMITORIOS</option>
+      <option value="CHATBOT RH">CHATBOT RH</option>
+      <option value="NUTRICION">NUTRICION</option>
+      <option value="CUENTAS CORPORATIVAS">CUENTAS CORPORATIVAS</option>
+    </select>
+
+    <label>Nombre</label>
+    <input id="in-nombre-{{id}}" oninput="syncPage('{{id}}')">
+
+    <div id="usuario-normal-{{id}}">
+      <label>Usuario</label>
+      <input id="in-usuario-{{id}}" oninput="syncPage('{{id}}')">
+    </div>
+
+        <div id="usuarios-corporativos-{{id}}" class="usuarios-corp-box" style="display:none;">
+            <div class="corp-header">
+              <input type="checkbox" id="check-misma-pass-{{id}}" onchange="syncPage('{{id}}')" checked>
+              <label class="check-label">Usar la misma contraseña para las 3</label>
+            </div>
+
+        <div id="row-input-comision-{{id}}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label>Usuario Comisión</label>
+              <button class="mini danger" onclick="toggleCorpRow('{{id}}', 'comision', false)">✕ Quitar</button>
+            </div>
+            <input id="in-usuario-comision-{{id}}" oninput="syncPage('{{id}}')">
+            <div id="wrapper-pass-com-{{id}}" style="display:none;">
+              <label>Pass Comisión</label>
+              <input id="in-pass-comision-{{id}}" oninput="syncPage('{{id}}')">
+            </div>
+        </div>
+        <button id="btn-add-comision-{{id}}" class="mini ghost" style="display:none; margin-bottom:10px;" onclick="toggleCorpRow('{{id}}', 'comision', true)">+ Agregar Comisión</button>
+
+        <div id="row-input-citas-{{id}}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label>Usuario Citas Médicas</label>
+              <button class="mini danger" onclick="toggleCorpRow('{{id}}', 'citas', false)">✕ Quitar</button>
+            </div>
+            <input id="in-usuario-citas-{{id}}" oninput="syncPage('{{id}}')">
+            <div id="wrapper-pass-citas-{{id}}" style="display:none;">
+              <label>Pass Citas Médicas</label>
+              <input id="in-pass-citas-{{id}}" oninput="syncPage('{{id}}')">
+            </div>
+        </div>
+        <button id="btn-add-citas-{{id}}" class="mini ghost" style="display:none; margin-bottom:10px;" onclick="toggleCorpRow('{{id}}', 'citas', true)">+ Agregar Citas Médicas</button>
+
+        <div id="row-input-gn-{{id}}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label>Usuario Comisión GN</label>
+              <button class="mini danger" onclick="toggleCorpRow('{{id}}', 'gn', false)">✕ Quitar</button>
+            </div>
+            <input id="in-usuario-comision-gn-{{id}}" oninput="syncPage('{{id}}')">
+            <div id="wrapper-pass-gn-{{id}}" style="display:none;">
+              <label>Pass Comisión GN</label>
+              <input id="in-pass-comision-gn-{{id}}" oninput="syncPage('{{id}}')">
+            </div>
+        </div>
+        <button id="btn-add-gn-{{id}}" class="mini ghost" style="display:none;" onclick="toggleCorpRow('{{id}}', 'gn', true)">+ Agregar Comisión GN</button>
+    </div>
+
+    <div id="wrapper-pass-general-{{id}}">
+      <label>Contraseña <span id="label-pass-type-{{id}}"></span></label>
+      <input id="in-contrasena-{{id}}" oninput="syncPage('{{id}}')">
+    </div>
+  </div>
+</template>
+
+<template id="template-sheet">
+  <div class="sheet" id="sheet-{{id}}">
+    <div class="top-title">AUTOBUSES ESTRELLA BLANCA</div>
+    <div class="title-line"></div>
+    <div class="title-line"></div>
+
+    <div class="meta-row">
+      <div><span id="out-solicitante-{{id}}"></span> :</div>
+      <div id="out-fecha-{{id}}"></div>
+    </div>
+
+    <div class="body">
+      <div style="margin:12px 0">
+        En relación con la solicitud del 
+        <span class="bold">ZenDesk Ticket # <span id="out-ticket-{{id}}"></span>
+        </span>, se solicita el acceso al sistema de
+        <span class="bold" id="out-sistema-{{id}}"></span>
+        le proporcionamos la siguiente información:
+      </div>
+
+      <table class="table normal-table" id="normal-table-{{id}}" style="display:none;">
+        <thead>
+          <tr>
+            <th style="width:40%">NOMBRE</th>
+            <th style="width:20%">USUARIO</th>
+            <th style="width:20%">CONTRASEÑA</th>
+            <th style="width:20%">FIRMA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="out-nombre" style="text-align:left;padding-left:8px;"></td>
+            <td class="out-usuario"></td>
+            <td class="out-contrasena"></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="table cuentas-table" id="cuentas-table-{{id}}" style="display:none;">
+        <thead>
+          <tr>
+            <th style="width:40%">NOMBRE</th>
+            <th>TIPO</th>
+            <th style="width:20%">USUARIO</th>
+            <th style="width:20%">CONTRASEÑA</th>
+            <th style="width:20%">FIRMA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="sheet-row-comision-{{id}}">
+            <td class="out-nombre" style="text-align:left;padding-left:8px;"></td>
+            <td class="bold">COMISIÓN</td> <td class="out-usuario-comision"></td>
+            <td class="out-pass-comision"></td> 
+            <td></td>
+          </tr>
+          <tr id="sheet-row-citas-{{id}}">
+            <td class="out-nombre"></td>
+            <td class="bold">CITAS MÉDICAS</td> <td class="out-usuario-citas"></td>
+            <td class="out-pass-citas"></td> 
+            <td></td>
+          </tr>
+          <tr id="sheet-row-gn-{{id}}">
+            <td class="out-nombre"></td>
+            <td class="bold">COMISIÓN GN</td> <td class="out-usuario-comision-gn"></td>
+            <td class="out-pass-gn"></td> 
+            <td></td>
+          </tr>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="politicas-container">
+        <div style="font-size: 11px;">Al ingresar por primera vez se les desplegará una pantalla en donde deberá cambiar su contraseña por razones de seguridad.</div>
+        <div style="margin-top:5px;font-size:11px;">Sin más por el momento, quedamos a sus órdenes para cualquier aclaración.</div>
+        <div class="sign-block">
+          <div>Atentamente</div>
+          <div><b>Atención IT a Usuarios.</b></div>
+          <div>Dirección de informática.</div>
+          <div> -------------------------------------------------------------------------</div>
+        </div>
+        <div class="divider"></div>
+        <div class="pol-title">Políticas de Seguridad (Acceso Sistemas de Información)</div>
+        <div class="pol-text">
+          La información de la Empresa es uno de los activos más importantes para las operaciones diarias de la misma. Parte de la información es confidencial y como usuario comparte la responsabilidad de protegerla. Para contribuir a la protección de la información y del sistema se incorpora un conjunto de reglas de seguridad en los sistemas de información que el usuario debe seguir.      <br><br>
+      El acceso a la información contenido en los equipos informáticos se otorga o revoca de acuerdo al área de trabajo de cada persona y
+      del entorno de la información que requiera. El acceso a la información en los equipos informáticos deberá ser requerido a través de un
+      escrito firmado por el Gerente o Director del área. Los usuarios otorgados para el ingreso a los Sistemas de información son de uso personal,
+      por lo que no debe haber razón alguna para que una persona se firme en el sistema con un usuario diferente al propio. Los usuarios deben finalizar
+      su sesión cuando abandonen su estación de trabajo. El sistema desconectará en forma automática, cuando los usuarios que no utilicen su sesión durante
+      un periodo de 30 minutos. Las personas que no utilicen su usuario por un periodo mayor a 30 días serán deshabilitados para ingresar al sistema, para ser
+      habilitados deben solicitarlo al área de Seguridad, la cual les otorgará una contraseña nueva, previa autenticación del usuario. Las personas que no utilicen
+      su usuario por un periodo mayor a 90 días serán dados de baja del sistema y para su reingreso deben solicitar el acceso como usuarios nuevos. La persona que
+      haga mal uso de su usuario será sancionado con la cancelación del mismo notificando al Gerente o Director del área el motivo de la cancelación y lo que resulte.
+      <br><br>
+      El mal uso de los accesos que le sean otorgados para el acceso a la información personal y confidencial contenida en los sistemas de información, puede incluso
+      hacerlo acreedor a un delito Federal por lo establecido en
+      <strong>La Ley Federal de Protección de Datos Personales en Posesión de los Particulares</strong>, vigente.
+        <div class="pol-title" style="margin-top:10px;">Políticas de Contraseña</div>
+
+    <div class="pol-text">
+      Todos los usuarios que ingresen por primera vez al sistema deberán cambiar su contraseña. Todos los usuarios deberán cambiar su contraseña cada 30 días.
+      La longitud de la contraseña será como mínimo de 5 caracteres y como máximo de 10 caracteres. La contraseña no deberá contener dígitos adyacentes, caracteres
+      repetidos consecutivamente, ni contener el carácter “@”. Al cambiar la contraseña, ésta no deberá ser igual a las últimas 32 contraseñas anteriores. Teclee
+      cuidadosamente el usuario y la contraseña, si la específica incorrectamente 3 veces consecutivas el sistema inhabilitará el perfil de usuario para iniciar la sesión.
+      <br><br>
+      Los sistemas de información están pensados para hacer nuestro trabajo más fácil y para mejorar el rendimiento de nuestro negocio. Las Políticas de Seguridad deben ayudarle,
+      si tiene alguna pregunta o sugerencia póngase en contacto con el Área de Service Desk al teléfono 5514005215 o al Área de Tecnología y Seguridad TI a los teléfonos 5514004514
+    </div>
+
+      <div class="footer-line"></div>
+      <div class="footer-note">Nombre y Firma de quién autoriza.</div>
+    </div>
+  </div>
+</template>
+
+<script src="script.js"></script>
+</body>
+</html>

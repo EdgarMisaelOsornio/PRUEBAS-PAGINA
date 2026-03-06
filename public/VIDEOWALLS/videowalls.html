@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/png" href="/logo.jpg">
+    <title>Videowalls | Service Desk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+        <div class="nav-right">
+            <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+                🏠 <span class="nav-text">Inicio</span>
+            </button>
+            <button class="dark-toggle" onclick="toggleDarkMode()" id="themeBtn">🌙</button>
+        </div>
+    </nav>
+
+    <header style="position: relative;">
+        <h1>Buscador y Organizador de Videowalls</h1>
+        <p class="subtitle">Gestión centralizada de pantallas y contactos de proveedores</p>
+        
+        <button class="header-action-btn" onclick="toggleFormularioPantalla()" style="position: absolute; top: 30px; right: 5%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer;">
+            ➕ Agregar / Editar Pantalla
+        </button>
+    </header>
+
+<div id="secAgregarPantalla" class="modal-overlay">
+    <div class="modal-content-custom">
+        <div class="modal-header">
+            <h3 style="margin:0;">⚙️ Gestión de Videowalls</h3>
+            <button class="btn-close-modal" onclick="toggleFormularioPantalla()">×</button>
+        </div>
+        
+        <div style="margin-bottom: 20px; padding: 15px; background: rgba(108, 92, 231, 0.1); border-radius: 12px; border: 1px solid var(--accent);">
+            <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">¿Quieres modificar uno existente?</label>
+            <select id="selectorExistentes" onchange="cargarDatosEnFormulario(this.value)" class="modal-input" style="background: var(--glass-bg); cursor: pointer;">
+                <option value="">-- Selecciona una oficina para editar --</option>
+                </select>
+            <p style="font-size: 0.75rem; margin-top: 5px; opacity: 0.8;">* Si es nuevo, ignora esto y escribe abajo.</p>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label style="font-size: 0.85rem; font-weight: bold;">Código de Archivo</label>
+                <input type="text" id="newCodigo" placeholder="Ej: MXN1A" class="modal-input">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.85rem; font-weight: bold;">Proveedor</label>
+                <input type="text" id="newProveedor" placeholder="Ej: MAX" class="modal-input">
+            </div>
+            <div class="form-group full">
+                <label style="font-size: 0.85rem; font-weight: bold;">Ubicación / Sala</label>
+                <input type="text" id="newSala" placeholder="Ej: MEXICO NORTE SALA 1" class="modal-input">
+            </div>
+        </div>
+
+        <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="limpiarFormulario()" style="background: rgba(255,255,255,0.05); color: var(--primary-text); border: 1px solid var(--glass-border); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Limpiar</button>
+            <button id="btnGuardarPantalla" onclick="guardarPantalla()" style="background: #28c76f; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                💾 Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
+    <main class="container fade-in">
+        <!-- NUEVO: Buscador de proveedor por oficina (mismo look & feel) -->
+                <div class="section-card">
+                <div class="section-title">
+                    <span class="step-badge">1</span>
+                    <h3>Buscar proveedor por oficina</h3>
+                </div>
+
+                <textarea id="buscadorProveedor" placeholder="Ejemplo:
+                MEXICO NORTE
+                ACAPULCO, PAPAGAYO
+                CD. JUAREZ
+
+                Tip: Puedes pegar varias oficinas (una por línea)" oninput="debounceBuscarProveedor()"></textarea>
+
+                <div class="button-group">
+                    <button class="primary" onclick="buscarProveedorPorOficina()">🔎 Buscar proveedor</button>
+                    <button class="ghost" onclick="limpiarBuscadorProveedor()">🧹 Limpiar</button>
+                </div>
+
+                <div id="resultadoProveedor" class="result-area"></div>
+                </div>
+
+
+        <div class="section-card">
+    <div class="section-title">
+        <span class="step-badge">2</span>
+        <h3>Buscar por archivos CSV</h3>
+    </div>
+    
+    <div class="upload-container" id="drop-area">
+        <input type="file" id="archivos" multiple accept=".csv" onchange="handleFiles(this.files)">
+        <div class="upload-content">
+            <span class="upload-icon">📁</span>
+            <p><strong>Haz clic para elegir</strong> o arrastra tus archivos CSV aquí</p>
+            <span id="file-counter" class="file-counter">Ningún archivo seleccionado</span>
+        </div>
+    </div>
+    
+    <div class="button-group">
+        <button class="primary" onclick="buscarPorArchivos()">📁 Procesar archivos</button>
+        <button class="success" onclick="descargarZip()">💾 Descargar ZIP por proveedor</button>
+    </div>
+    <div id="resultadoArchivos" class="result-area"></div>
+</div>
+
+        
+
+
+     <div class="section-card">
+    <div class="section-title">
+        <span class="step-badge">3</span>
+        <h3>Contactos de Proveedores</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="corporate-table">
+            <thead>
+                <tr>
+                    <th>Proveedor</th>
+                    <th>Correos de Contacto (Directos)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="provider-info">
+                            <span class="provider-name">MAX</span>
+                            <button class="copy-all-btn" onclick="copiarCorreos('lilia.garcia@max-signage.mx;lili.inclan.max@gmail.com;oscar.rivero@max-signage.com.mx')">📋 Copiar todos</button>
+                        </div>
+                    </td>
+                    <td>
+                        <ul class="email-list">
+                            <li><a href="mailto:lilia.garcia@max-signage.mx">lilia.garcia@max-signage.mx</a></li>
+                            <li><a href="mailto:lili.inclan.max@gmail.com">lili.inclan.max@gmail.com</a></li>
+                            <li><a href="mailto:oscar.rivero@max-signage.com.mx">oscar.rivero@max-signage.com.mx</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="provider-info">
+                            <span class="provider-name">TECNOMANIA</span>
+                            <button class="copy-all-btn" onclick="copiarCorreos('diego@tecnomania.com.mx;Ds@tecnomania.com.mx;omar@tecnomania.com.mx')">📋 Copiar todos</button>
+                        </div>
+                    </td>
+                    <td>
+                        <ul class="email-list">
+                            <li><a href="mailto:diego@tecnomania.com.mx">diego@tecnomania.com.mx</a></li>
+                            <li><a href="mailto:Ds@tecnomania.com.mx">Ds@tecnomania.com.mx</a></li>
+                            <li><a href="mailto:omar@tecnomania.com.mx">omar@tecnomania.com.mx</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="provider-info">
+                            <span class="provider-name">MAGIC</span>
+                            <button class="copy-all-btn" onclick="copiarCorreos('hebe@leafmagicav.com;aimee.sanchez@leafmagicav.com;jorge.garcia@leafmagicav.com;desing@leafmagicav.com')">📋 Copiar todos</button>
+                        </div>
+                    </td>
+                    <td>
+                        <ul class="email-list">
+                            <li><a href="mailto:hebe@leafmagicav.com">hebe@leafmagicav.com</a></li>
+                            <li><a href="mailto:aimee.sanchez@leafmagicav.com">aimee.sanchez@leafmagicav.com</a></li>
+                            <li><a href="mailto:jorge.garcia@leafmagicav.com">jorge.garcia@leafmagicav.com</a></li>
+                            <li><a href="mailto:desing@leafmagicav.com">desing@leafmagicav.com</a></li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="provider-info">
+                            <span class="provider-name">STRATECH</span>
+                            <button class="copy-all-btn" onclick="copiarCorreos('soporte@stratech.digital;nolvera@stratech.digital;jcruz@stratech.digital;eposada@stratech.digital')">📋 Copiar todos</button>
+                        </div>
+                    </td>
+                    <td>
+                        <ul class="email-list">
+                            <li><a href="mailto:soporte@stratech.digital">soporte@stratech.digital</a></li>
+                            <li><a href="mailto:nolvera@stratech.digital">nolvera@stratech.digital</a></li>
+                            <li><a href="mailto:jcruz@stratech.digital">jcruz@stratech.digital</a></li>
+                            <li><a href="mailto:eposada@stratech.digital">eposada@stratech.digital</a></li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="toast-container" class="toast-container"></div>
+</div>
+    </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+            
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+            
+            <script type="module" src="script.js"></script>
+    
+        <script>
+            function toggleDarkMode() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                // Usamos 'videowalls-theme' para que sea independiente
+                localStorage.setItem('videowalls-theme', isDark ? 'dark' : 'light');
+                document.getElementById('themeBtn').innerText = isDark ? "☀️" : "🌙";
+            }
+            if (localStorage.getItem('videowalls-theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeBtn').innerText = "☀️";
+            }
+        </script>
+
+      <footer>
+       © 2026 Verificador de Videowalls — Desarrollado por ServiceDesk
+    </footer>
+
+    
+  <div id="toast-container" class="toast-container"></div>
+</body>
+</html>

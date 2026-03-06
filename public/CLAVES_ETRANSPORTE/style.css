@@ -1,0 +1,547 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --primary-text: #2d3436;
+    --accent: #6c5ce7;
+    --shadow: 0 20px 50px rgba(0,0,0,0.05);
+}
+
+.dark-mode {
+    --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    --glass-bg: rgba(20, 20, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --primary-text: #ffffff;
+    --accent: #a29bfe;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+
+    zoom: 0.75; 
+    -moz-transform: scale(0.8);
+    -moz-transform-origin: top center;
+    
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--primary-text);
+    transition: all 0.5s ease;
+}
+
+/* NAVBAR */
+.navbar {
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo { font-weight: 800; font-size: 1.3rem; letter-spacing: -1px; text-transform: uppercase; }
+
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* Botón Inicio y Dark Mode unificados */
+.nav-btn-header, .dark-toggle {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: var(--primary-text);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+    font-family: inherit;
+}
+
+.nav-btn-header:hover, .dark-toggle:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* CONTAINER */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    padding: 40px;
+    border-radius: 32px;
+    box-shadow: var(--shadow);
+}
+
+header { text-align: center; margin: 40px 0; }
+header h1 { font-size: 2.2rem; font-weight: 800; }
+.subtitle { opacity: 0.7; }
+
+/* FORMS */
+.form-group { margin-bottom: 20px; }
+label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
+
+textarea, input, select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--primary-text);
+    font-family: inherit;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.dark-mode textarea, .dark-mode input, .dark-mode select {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+textarea:focus, input:focus, select:focus {
+    outline: none;
+    background: var(--glass-bg);
+    border-color: var(--accent);
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* BUTTONS */
+.buttons { display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap; }
+button:not(.nav-btn-header):not(.dark-toggle) {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.primary { background: var(--accent); color: white; }
+button.success { background: #00b894; color: white; }
+button.info { background: #0984e3; color: white; }
+
+
+
+
+/* OUTPUT */
+pre {
+    background: rgba(0,0,0,0.05);
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    white-space: pre-wrap;
+    color: var(--primary-text);
+    font-family: 'Courier New', monospace;
+}
+
+.dark-mode pre { background: rgba(255, 255, 255, 0.05); }
+
+footer { text-align: center; padding: 40px; opacity: 0.6; font-size: 0.85rem; }
+
+@media (max-width: 768px) {
+    .form-row { grid-template-columns: 1fr; }
+    .nav-text { display: none; }
+}
+/* 1. EL CONTENEDOR (La caja con slider) */
+#resultadosBusqueda {
+    position: relative;
+    width: 100%;
+    z-index: 1000;
+
+    /* ESPEJO: fondo casi inexistente */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.28),
+        rgba(255, 255, 255, 0.04)
+    );
+
+    backdrop-filter: blur(45px) saturate(220%) brightness(115%);
+    -webkit-backdrop-filter: blur(45px) saturate(220%) brightness(115%);
+
+    /* filo de cristal */
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 22px;
+
+    margin-top: 15px;
+    margin-bottom: 30px;
+
+    /* reflejo interno + separación */
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 2px rgba(255, 255, 255, 0.25),
+        0 20px 50px rgba(0, 0, 0, 0.25);
+
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 12px;
+    display: none;
+}
+
+
+
+.search-section {
+    position: relative;
+    margin-bottom: 30px; /* Aumentamos el espacio inferior */
+}
+/* 2. DISEÑO DE CADA ITEM (Los resultados inyectados) */
+.search-item {
+    padding: 12px 16px;
+    margin-bottom: 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--primary-text);
+    border: 1px solid transparent;
+    line-height: 1.4;
+}
+
+/* Estilo del texto dentro del item (basado en tu JS) */
+.search-item b {
+    color: var(--accent);
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+.search-item small {
+    opacity: 0.7;
+    font-size: 0.8rem;
+    display: block; /* Para que la dirección baje */
+    margin-top: 2px;
+}
+
+/* 3. EFECTO HOVER (Selección) */
+.search-item:hover {
+    background: var(--accent);
+    border-color: var(--glass-border);
+    transform: translateX(5px);
+}
+
+.search-item:hover b, 
+.search-item:hover small,
+.search-item:hover {
+    color: white !important; /* Todo el texto blanco al seleccionar */
+}
+
+/* 4. PERSONALIZACIÓN DEL SLIDER (SCROLLBAR) */
+#resultadosBusqueda::-webkit-scrollbar {
+    width: 6px;
+}
+
+#resultadosBusqueda::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+#resultadosBusqueda::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    margin: 10px;
+    border-radius: 10px;
+}
+
+/* Estilo para el mensaje "No se encontraron resultados" */
+#resultadosBusqueda p {
+    color: var(--primary-text);
+    opacity: 0.6;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 20px !important;
+}
+
+/* 1. CAJA DE RESULTADO (Estilo Cristalizado Premium) */
+#resultado {
+    /* Fondo ultra-cristalino con gradiente sutil */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 0.03)
+    );
+
+    /* Desenfoque profundo para efecto espejo */
+    backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+
+    /* Filo de cristal brillante */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 24px;
+    
+    /* Espaciado y Sombra */
+    padding: 25px;
+    margin-top: 15px;
+    box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        0 15px 35px rgba(0, 0, 0, 0.1);
+
+    /* LIMITACIÓN Y SLIDER PROPIO */
+    max-height: 400px; /* Altura máxima para activar el slider */
+    overflow-y: auto;  /* Slider vertical automático */
+    overflow-x: hidden; /* Evita slider horizontal si el texto se ajusta */
+    
+    /* Tipografía y texto */
+    white-space: pre-wrap; /* Mantiene saltos de línea y ajusta al ancho */
+    color: var(--primary-text);
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* 2. MODO OSCURO PARA EL RESULTADO */
+.dark-mode #resultado {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.01)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 3. PERSONALIZACIÓN DEL SLIDER (SCROLLBAR) DEL RESULTADO */
+#resultado::-webkit-scrollbar {
+    width: 8px;
+}
+
+#resultado::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+    border: 2px solid transparent; /* Efecto de separación */
+    background-clip: content-box;
+}
+
+#resultado::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    margin: 15px;
+    border-radius: 10px;
+}
+
+/* 4. ESTILO DE ERRORES (Opcional para que combine) */
+#errores {
+    margin-top: 10px;
+    color: #ff7675;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding-left: 10px;
+}
+
+/* =========================================
+   SECCIÓN: AGREGAR OFICINA MANUALMENTE (CORREGIDO)
+   ========================================= */
+
+/* Contenedor específico */
+.manual-section {
+    margin-bottom: 20px;
+    border-top: 4px solid var(--accent);
+    padding-top: 15px; /* Un poco más de aire arriba */
+}
+
+/* Grid principal */
+.form-grid {
+    display: grid;
+    /* Aumentamos el mínimo a 180px para que quepan mejor las etiquetas */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px; /* Más espacio entre columnas */
+    align-items: end; /* Alinea los inputs abajo si las etiquetas tienen distinta altura */
+}
+
+/* Estilo para cada par Label + Input */
+.form-field {
+    display: flex;
+    flex-direction: column; /* Apila la etiqueta sobre el input */
+    gap: 5px; /* Espacio pequeño entre etiqueta e input */
+}
+
+/* Asegurar que las etiquetas se vean bien y no se amontonen */
+.form-field label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap; /* Evita que la etiqueta se parta en dos líneas si es posible */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Asegurar que el input llene su espacio */
+.form-field input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Espaciado para el botón */
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start; /* Alinea el botón a la izquierda */
+}
+
+
+/* Fondo oscuro translúcido */
+.modal {
+    position: fixed;
+    z-index: 9999; /* Por encima de todo */
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+}
+
+/* Caja de la ventana */
+.modal-content {
+    background-color: var(--glass-bg);
+    color: var(--primary-text);
+    margin: 5% auto;
+    padding: 25px;
+    border-radius: 15px;
+    width: 70%;
+    max-width: 800px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid var(--glass-border);
+}
+
+.table-container-modal {
+    max-height: 400px; /* Altura fija con scroll */
+    overflow-y: auto;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+}
+
+.close-modal {
+    float: right;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- Títulos y Buscador del Modal --- */
+.modal-header h2 {
+    margin-bottom: 10px;
+    color: var(--accent);
+}
+
+.modal-search-container {
+    margin: 15px 0;
+}
+
+#buscadorModal {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--primary-text);
+    font-size: 1rem;
+}
+
+/* --- Estructura de la Tabla --- */
+.table-container-modal table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina espacios entre celdas */
+    text-align: left;
+}
+
+.table-container-modal th {
+    background-color: var(--accent);
+    color: white;
+    padding: 12px;
+    position: sticky; /* El encabezado se queda fijo al bajar */
+    top: 0;
+    z-index: 5;
+}
+
+.table-container-modal td {
+    padding: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+/* Filas intercaladas para leer mejor */
+.table-container-modal tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.table-container-modal tr:hover {
+    background: rgba(108, 92, 231, 0.1); /* Resaltado al pasar el mouse */
+}
+
+/* Estilo del botón Corregir dentro de la tabla */
+.btn-edit {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.3s;
+}
+
+.btn-edit:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+
+/* =========================================
+   BOTÓN FLOTANTE "AGREGAR OFICINA"
+   ========================================= */
+
+.header-action-btn {
+    position: absolute;
+    top: 20px;          /* Distancia desde el borde superior del header */
+    right: 5%;          /* Distancia desde la derecha (alineado con el margen de la navbar) */
+    
+    background: rgba(255, 255, 255, 0.15); /* Fondo semitransparente */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: var(--primary-text);
+    padding: 10px 20px;
+    border-radius: 12px;
+    
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    
+    backdrop-filter: blur(8px); /* Efecto vidrio */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el icono ➕ y el texto */
+    z-index: 50;
+}
+
+/* Efecto al pasar el mouse */
+.header-action-btn:hover {
+    background: var(--accent); /* Se pinta de morado */
+    color: white;
+    transform: translateY(-3px); /* Flota un poco hacia arriba */
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+    border-color: var(--accent);
+}
+
+/* Efecto al presionar */
+.header-action-btn:active {
+    transform: scale(0.95);
+}
+
+/* Ajuste para celulares (para que no se rompa el diseño) */
+@media (max-width: 768px) {
+    .header-action-btn {
+        position: static; /* Deja de flotar y se pone abajo del título */
+        margin: 15px auto;
+        display: block;
+        width: 80%;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

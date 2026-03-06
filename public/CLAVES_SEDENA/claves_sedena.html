@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="/logo.jpg">
+  <title>Cuentas Corporativas | Service Desk</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+
+    <div class="nav-right">
+      <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+        🏠 <span class="nav-text">Inicio</span>
+      </button>
+      <button class="dark-toggle" onclick="toggleDarkMode()" id="themeBtn">🌙</button>
+    </div>
+  </nav>
+
+  <header>
+    <h1>Generador de Claves Corporativas</h1>
+    <p class="subtitle">Crea usuarios y contraseñas automáticamente para cuentas corporativas y citas médicas</p>
+  </header>
+
+  <main class="container fade-in">
+    <div class="card" role="region" aria-labelledby="cardTitle">
+      <h2 id="cardTitle" class="visually-hidden">Formulario de generación</h2>
+
+      <div id="loaderBar" class="loader-row">
+        <div id="loadStatus" class="status-message">Iniciando...</div>
+        <div id="spinner" class="spinner" aria-hidden="true"></div>
+      </div>
+
+      <form id="generator" novalidate>
+
+        <fieldset>
+          <legend class="sr-only">Selección de agencia</legend>
+
+          <label for="officeSearch">Buscar agencia</label>
+          <input
+            id="officeSearch"
+            type="text"
+            placeholder="Escribe nombre, número o nomenclatura..."
+            autocomplete="off"
+            disabled
+          />
+
+          <label for="officeSelect">Selecciona Agencia (Nombre de Agencia)</label>
+          <select id="officeSelect" aria-describedby="officeHelp" disabled>
+            <option value="">-- Cargando agencias activas... --</option>
+          </select>
+
+          <small id="officeHelp" class="muted">
+            Puedes arrastrar el archivo <code>AGENCIAS.csv</code> a la zona inferior si no funciona la carga.
+          </small>
+        </fieldset>
+
+        <fieldset class="row">
+          <legend class="sr-only">Datos del usuario</legend>
+
+          <div>
+            <label for="curpInput">CURP del usuario</label>
+            <input id="curpInput" name="curp" type="text" maxlength="18"
+              placeholder="Ej: MAAR251024MMNRRTA3" inputmode="text" aria-describedby="curpHelp" />
+            <div id="curpHelp" class="helper"></div>
+          </div>
+
+          <div>
+            <label for="nameInput">Nombre completo del usuario</label>
+            <input id="nameInput" name="nombre" type="text"
+              placeholder="Ej: RUTH MARIA ARNAIZ" aria-describedby="nameHelp" />
+            <div id="nameHelp" class="helper"></div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button id="generate" class="primary" type="button" disabled>Generar</button>
+          <button id="copyAll" class="ghost" type="button">Copiar fila CSV</button>
+          <button id="downloadCsv" class="ghost" type="button">Descargar CSV</button>
+          <button id="clearBtn" class="ghost" type="button">Limpiar</button>
+        </div>
+
+        <hr />
+
+        <div class="output" id="outputArea" hidden>
+
+          <div class="field">
+            <div class="small">Usuario (Corporativo)</div>
+            <div id="outUser" class="generated"></div>
+          </div>
+
+          <div class="field">
+            <div class="small">Contraseña (Corporativa)</div>
+            <div id="outPassDuplicate1" class="generated"></div>
+          </div>
+
+          <div class="field citas-field">
+            <div class="small">Usuario (Citas Médicas)</div>
+            <div id="outCitasUser" class="generated"></div>
+          </div>
+
+          <div class="field citas-field">
+            <div class="small">Contraseña (Citas Médicas)</div>
+            <div id="outPassDuplicate2" class="generated"></div>
+          </div>
+
+          <div class="field gn-field">
+            <div class="small">Usuario GN</div>
+            <div id="outGNUser" class="generated"></div>
+          </div>
+
+          <div class="field gn-field">
+            <div class="small">Contraseña (GN)</div>
+            <div id="outPassDuplicate3" class="generated"></div>
+          </div>
+
+          <div class="field info-field">
+            <div class="small">Oficina (Número)</div>
+            <div id="outOffice" class="generated"></div>
+          </div>
+
+          <div class="field info-field">
+            <div class="small">Nomenclatura (3 letras)</div>
+            <div id="outNomen" class="generated"></div>
+          </div>
+
+          <div class="field full-width">
+            <div class="small">Descripción (Nombre Completo)</div>
+            <div id="outDesc" class="generated"></div>
+          </div>
+
+          <!-- Hidden (para export/copiar) -->
+          <div id="outPass" hidden></div>
+          <div id="outConfirm" hidden></div>
+        </div>
+
+    
+
+      </form>
+    </div>
+  </main>
+
+   <footer>
+       © 2026 Generador Profesional — Desarrollado por ServiceDesk
+    </footer>
+
+  <script src="script.js"></script>
+<script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      // CAMBIO: Usamos 'sedena-theme' para que no choque con el Dashboard
+      localStorage.setItem('sedena-theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeBtn').innerText = isDark ? "☀️" : "🌙";
+    }
+
+    // Leemos específicamente la configuración de SEDENA al cargar
+    if (localStorage.getItem('sedena-theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      document.getElementById('themeBtn').innerText = "☀️";
+    }
+  </script>
+</body>
+</html>
