@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo.jpg">
+  <title>Oficinas E-Transporte | Service Desk</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+    
+    <div class="nav-right">
+        <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+            🏠 <span class="nav-text">Inicio</span>
+        </button>
+        <button class="dark-toggle" onclick="toggleDarkMode()" id="themeBtn">🌙</button>
+    </div>
+  </nav>
+
+  <header style="position: relative;">
+    <div class="header-content">
+      <h1>📂 Generador de Oficinas</h1>
+      <p class="subtitle">Crea, organiza y exporta tus listas de oficinas fácilmente</p>
+    </div>
+    
+    <button class="header-action-btn" onclick="toggleFormulario()" style="position: absolute; top: 30px; right: 5%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer;">
+        ➕ Agregar Oficina
+    </button>
+  </header>
+
+<div id="modalAdmin" class="modal-overlay" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+    <div class="modal-content-custom" style="background:var(--glass-bg); padding:30px; border-radius:25px; width:95%; max-width:600px; border:1px solid var(--glass-border); position: relative; color: var(--primary-text);">
+        
+        <button onclick="toggleFormulario()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit;">✕</button>
+        
+        <h3 style="margin-bottom: 20px;">⚙️ Panel de Administración de Oficinas</h3>
+        
+<div class="search-section-admin" style="position: relative; margin-bottom: 25px;"> 
+    <label style="display: block; margin-bottom: 8px; font-weight: 600;">🔍 Buscar Oficina para Editar</label>
+    <input type="text" id="buscadorRapidoAdmin" 
+           placeholder="Escribe nombre o clave (ej: 0001 o Central)..." 
+           autocomplete="off"
+           style="width:100%; padding:12px; background:rgba(255,255,255,0.1); color:inherit; border:1px solid var(--glass-border); border-radius:12px; outline:none;">
+    <div id="resultadosAdmin" class="search-results-custom" 
+         style="display:none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 12px; z-index: 1000; max-height: 250px; overflow-y: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 5px;">
+    </div>
+</div>
+        <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 20px 0;">
+<div id="datosActualesDiv" style="display: none; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px dashed var(--glass-border); margin-top: 15px; margin-bottom: 15px;">
+    <h4 style="margin-bottom: 10px; font-size: 0.8rem; text-transform: uppercase; opacity: 0.7;">📍 Editando Datos Actuales</h4>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="form-field">
+            <label style="font-size: 0.75rem;">Clave actual:</label>
+            <div id="oldClave" style="padding: 8px; opacity: 0.6; font-weight: bold;">-</div>
+        </div>
+        <div class="form-field">
+            <label style="font-size: 0.75rem;">Dirección / Región actual:</label>
+            <div id="oldDireccion" style="padding: 8px; opacity: 0.6; font-weight: bold;">-</div>
+        </div>
+      <div class="form-field">
+            <label style="font-size: 0.75rem;">Nombre actual:</label>
+            <div id="oldNombre" style="padding: 8px; opacity: 0.6; font-weight: bold;">-</div>
+        </div>
+        <div class="form-field">
+            <label style="font-size: 0.75rem;">Nomenclatura actual:</label>
+            <div id="oldNomenclatura" style="padding: 8px; opacity: 0.6; font-weight: bold;">-</div>
+        </div>
+    </div>
+</div>
+
+<div style="background: rgba(108, 92, 231, 0.05); padding: 15px; border-radius: 12px; border: 1px solid var(--accent); margin-top: 15px;">
+    <h4 id="tituloAccionFormulario" style="margin-bottom: 15px; font-size: 0.8rem; text-transform: uppercase; color: var(--accent);">✨ Alta de Nueva Oficina</h4>
+    
+    <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-field">
+            <label>Clave de Oficina</label>
+            <input type="text" id="newClave" style="background: rgba(0,0,0,0.2);">
+        </div>
+        
+        <div class="form-field">
+            <label>Dirección / Región</label>
+            <select id="newDireccion">
+                <option value="">-- Selecciona Dirección --</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label>Nombre de la Oficina</label>
+            <input type="text" id="newNombre" placeholder="Ej: Central">
+        </div>
+
+        <div class="form-field">
+            <label>Nomenclatura</label>
+            <input type="text" id="newNomenclatura" placeholder="Ej: ABC">
+        </div>
+    </div>
+</div>
+
+
+        <div style="margin-top: 25px; display: flex; gap: 10px;">
+            <button class="success" onclick="guardarOficinaManual()" style="flex: 1; padding: 15px; border-radius: 12px;">💾 Guardar Cambios</button>
+            <button class="info" onclick="toggleFormulario()" style="padding: 15px; border-radius: 12px; background: rgba(255,255,255,0.1); color: inherit; border: 1px solid var(--glass-border);">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="modalCorreccion" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close-modal" onclick="cerrarModal()">&times;</span>
+  </div>
+</div>
+
+  <div id="modalConfirmacion" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px; text-align: center;">
+      <div class="modal-header">
+        <h2 style="color: var(--accent);">⚠️ Confirmación</h2>
+      </div>
+      <div id="confirmMensaje" style="margin: 20px 0; line-height: 1.6; text-align: left; font-size: 0.95rem;">
+        </div>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button id="btnConfirmarSi" class="success" style="padding: 10px 20px;">Sí, Sobrescribir</button>
+        <button id="btnConfirmarNo" class="warning" style="padding: 10px 20px; background: #666; border-color: #666;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalMensaje" class="modal" style="display: none;">
+  <div class="modal-content" style="max-width: 450px; text-align: center;">
+    <div id="mensajeIcono" style="font-size: 3.5rem; margin-bottom: 15px;"></div>
+    <h2 id="mensajeTitulo" style="margin-bottom: 15px; font-weight: 800;"></h2>
+    <div id="mensajeTexto" style="margin-bottom: 25px; line-height: 1.6;"></div>
+    <button onclick="cerrarMensaje()" class="primary" style="padding: 10px 40px; font-weight: bold;">Entendido</button>
+  </div>
+</div>
+
+
+
+  <main class="container fade-in">
+    <div class="form-group">
+      <label>Seleccionar Dirección</label>
+      <select id="filtroDireccion">
+          <option value="">-- Selecciona una Dirección --</option>
+      </select>
+    </div>
+
+    <button class="primary" onclick="agregarOficinasPorDireccion()">➕ Agregar Oficinas de la Dirección</button>
+    <br><br>
+
+  <div class="search-section" style="position: relative;"> 
+      <label>Buscar Oficina</label>
+      <input type="text" id="buscar" placeholder="Escribe nombre o clave..." autocomplete="off">
+      <div id="resultadosBusqueda" class="search-results"></div>
+  </div> 
+
+    <div class="form-section">
+      <div class="form-group">
+        <label>Lista de Oficinas <span>(una por línea)</span></label>
+        <textarea id="oficinas" rows="8" placeholder="Ejemplo: 0724"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Clave de usuario</label>
+          <input type="text" id="usuario" placeholder="Ejemplo: 132605">
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de puesto</label>
+          <select id="puesto">
+            <option>ADMINISTRATIVO RECAUDACION</option>
+            <option>AGENTES DE CALL CENTER</option>
+            <option>ANALISTA DE LOGISTICA</option>
+            <option>AUDITOR</option>
+            <option>AUXILIAR DE AREA CORPORATIVO</option>
+            <option>AUXILIAR DE NOMINAS</option>
+            <option>AUXILIAR DE SERVICIOS</option>
+            <option>AUXILIAR DE CUENTAS</option>
+            <option>AUXILIAR ADMINISTRATIVO</option>
+            <option>AUXILIAR CONTABLE</option>
+            <option>CAJERO RECAUDADOR</option>
+            <option>COORDINADOR COMERCIAL</option>
+            <option>COORDINADOR DE RECAUDACIONES</option>
+            <option>COORDINADOR OPERATIVO</option>
+            <option>DIRECTOR DE AREA CORPORATIVO</option>
+            <option>DIRECTOR OPERATIVO</option>
+            <option>ENCARGADO DE AREA CORPORATIVO</option>
+            <option>ENCARGADO DE VALORES</option>
+            <option>ENCARGADO IDEA</option>
+            <option>GERENTE COMERCIAL</option>
+            <option>GERENTE DE LOGISTICA</option>
+            <option>GERENTE DE RECAUDACION</option>
+            <option>GERENTE DE RECURSOS HUMANOS</option>
+            <option>GERENTE OPERATIVO</option>
+            <option>JEFE ADMINISTRATIVO</option>
+            <option>JEFE DE AUDITORIA</option>
+            <option>JEFE DE INFORMATICA</option>
+            <option>JEFE DE NOMINAS</option>
+            <option>JEFE DE OFICINA</option>
+            <option>JEFE DE PERSONAL</option>
+            <option>JEFE DE PRESTACIONES</option>
+            <option>JEFE DE RECAUDACION</option>
+            <option>JEFE DE RECURSOS HUMANOS</option>
+            <option>JEFE DE SERVICIOS</option>
+            <option>JEFE DE TAQUILLAS</option>
+            <option>PROMOTOR DE VENTAS</option>
+            <option>PROMOTOR DE VENTAS CALL CENTER</option>
+            <option>PROMOTOR DE VENTAS Y SERVICIOS</option>
+            <option>RECAUDADOR</option>
+            <option>SUPERVISOR DE CALL CENTER</option>
+            <option>SUPERVISOR SERVICIOS</option>
+          </select>
+        </div>
+      </div>
+
+      
+    <div class="buttons">
+      <button class="primary" onclick="generar()">✨ Generar</button>
+      <button class="success" onclick="descargarExcel()">📊 Descargar Excel</button>
+      <button class="success" onclick="xlsxOriginal()">📁 Archivo de las Oficinas </button>     
+      <button class="info" onclick="descargarWord()">📝 Descargar Word</button>
+      <button class="warning" onclick="irAPoliticas()">📋 Generar Políticas</button>       
+    </div>
+    </div>
+    
+
+    <div class="output">
+      <h3>📄 Resultado generado</h3>
+      <pre id="resultado"></pre>
+      <div id="errores" class="error"></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Generador Profesional — Desarrollado por ServiceDesk</p>
+  </footer>
+
+  <script type="module" src="./js/main.js"></script>
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('etransporte-theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeBtn').innerText = isDark ? "☀️" : "🌙";
+    }
+    if (localStorage.getItem('etransporte-theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeBtn').innerText = "☀️";
+    }
+  </script>
+</body>
+</html>
