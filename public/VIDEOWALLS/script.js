@@ -1,4 +1,3 @@
-let BUSQUEDA_ACTIVA = false; 
 let archivosSubidos = [];
 let _proveedorTimer = null;
 // ==========================================
@@ -125,12 +124,9 @@ window.marcarFila = function(checkbox) {
 window.debounceBuscarProveedor = debounceBuscarProveedor;
 window.limpiarBuscadorProveedor = limpiarBuscadorProveedor;
 window.buscarProveedorPorOficina = buscarProveedorPorOficina;
-window.buscarPorNombre = buscarPorNombre;
-window.cancelarBusqueda = cancelarBusqueda;
 window.buscarPorArchivos = buscarPorArchivos;
 window.descargarZip = descargarZip;
 window.copiarCorreos = copiarCorreos;
-window.marcarFila = marcarFila; // La moví aquí para consistencia
 
 
 // ==========================================
@@ -150,16 +146,6 @@ function normalizar(texto){
     .replace(/\bCD\b/gi,"CIUDAD")  
     .trim()
     .toUpperCase();
-}
-
-function cancelarBusqueda(){
-  if(!BUSQUEDA_ACTIVA) return;
-  BUSQUEDA_ACTIVA = false;
-  document.getElementById("btnBuscar").disabled = false;
-  document.getElementById("btnCancelar").disabled = true;
-  document.getElementById("progresoBusqueda").innerText = "Búsqueda cancelada por el usuario.";
-  document.getElementById("barraProgreso").style.display = "none";
-  console.log("Procesamiento abortado por cancelación.");
 }
 
 function escapeHtml(str){
@@ -316,207 +302,6 @@ function buscarProveedorPorOficina(auto = false){
   out.innerHTML = html;
 }
 
-function buscarPorNombre(){
-  if(BUSQUEDA_ACTIVA){
-    console.log("Ya hay una búsqueda en curso.");
-    return;
-  }
-
-  const raw = document.getElementById("solicitudes").value;
-  const resultado = document.getElementById("resultadoNombres");
-  const progresoEl = document.getElementById("progresoBusqueda");
-  const barra = document.getElementById("barraProgreso");
-  const barraFill = document.getElementById("barraProgresoFill");
-  resultado.innerHTML = "";
-  progresoEl.innerHTML = "";
-  barra.style.display = "none";
-  barraFill.style.width = "0%";
-
-  if(!raw || raw.trim() === ""){
-    resultado.innerHTML = "<p class='no-match'>❌ Ingrese al menos una oficina.</p>";
-    return;
-  }
-
-  const LIMITE_MODO_REDUCIDO = 100; 
-  const BATCH_SIZE = 250; 
-  const RENDER_BATCH = 300; 
-
-  const LINE_SPLIT = raw.replace(/\r/g,"").split("\n");
-  const mapaUnicos = new Map();
-
-  LINE_SPLIT.forEach(l => {
-    const original = l.trim();
-    const normalizada = normalizar(l);
-    if (!normalizada) return;
-    if (!mapaUnicos.has(normalizada)) {
-      mapaUnicos.set(normalizada, { original, normalizada });
-    }
-  });
-
-  const entradas = Array.from(mapaUnicos.values());
-  const totalEntradas = entradas.length;
-  
-  if(totalEntradas === 0){
-    resultado.innerHTML = "<p class='no-match'>No se encontraron líneas válidas.</p>";
-    return;
-  }
-
-  const modoReducido = totalEntradas > LIMITE_MODO_REDUCIDO;
-  BUSQUEDA_ACTIVA = true;
-  document.getElementById("btnBuscar").disabled = true;
-  document.getElementById("btnCancelar").disabled = false;
-  progresoEl.innerText = `Iniciando procesamiento de ${totalEntradas} oficinas...`;
-  barra.style.display = "block";
-
-  let index = 0;
-  let encontradas = []; 
-  let noEncontradas = []; 
-
-  function procesarBatch(){
-    if(!BUSQUEDA_ACTIVA) return;
-
-    const end = Math.min(index + BATCH_SIZE, totalEntradas);
-    for(let i = index; i < end; i++){
-      const e = entradas[i];
-      const palabras = e.normalizada.split(" ").filter(Boolean);
-      const coincidencias = base.filter(b => {
-        const nombreBase = normalizar(b[1]);
-        return palabras.every(p => {
-          const esc = p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const re = new RegExp(`\\b${esc}\\b`, "i");
-          return re.test(nombreBase);
-        });
-      });
-
-      if(coincidencias.length === 0){
-        if(!modoReducido) noEncontradas.push({ buscada: e.original });
-      } else {
-        coincidencias.forEach(c => {
-          const key = e.normalizada + "||" + c[1];
-          if (!encontradas.some(x => x.key === key)) {
-            encontradas.push({ key, buscada: e.original, nombre: c[1], proveedor: c[2] });
-          }
-        });
-      }
-    }
-
-    index = end;
-    const pct = Math.round((index / totalEntradas) * 100);
-    progresoEl.innerText = `Procesando ${totalEntradas} oficinas... ${pct}% (${index}/${totalEntradas})`;
-    barraFill.style.width = pct + "%";
-
-    if(index < totalEntradas){
-      setTimeout(procesarBatch, 0);
-    } else {
-      setTimeout(() => renderizarResultados(), 0);
-    }
-  }
-
-  function renderizarResultados(){
-    if(!BUSQUEDA_ACTIVA) return;
-
-    const resumen = document.createElement("div");
-    resumen.innerHTML = `<p>Encontradas: <strong>${encontradas.length}</strong>${!modoReducido ? ` — No encontradas: <strong>${noEncontradas.length}</strong>` : ""}</p>`;
-    resultado.appendChild(resumen);
-
-    if(modoReducido){
-      const titulo = document.createElement("h4");
-      titulo.innerText = `⚠ Modo reducido (se ingresaron ${totalEntradas} oficinas). Solo se muestran coincidencias encontradas.`;
-      resultado.appendChild(titulo);
-
-      if(encontradas.length === 0){
-        const p = document.createElement("p");
-        p.className = "no-match";
-        p.innerText = "❌ Ninguna coincidencia encontrada";
-        resultado.appendChild(p);
-        finalizar();
-        return;
-      }
-
-      const tabla = document.createElement("table");
-      tabla.innerHTML = `<thead><tr><th>Buscada</th><th>Coincidencia</th><th>Proveedor</th></tr></thead><tbody></tbody>`;
-      resultado.appendChild(tabla);
-      const tbody = tabla.querySelector("tbody");
-
-      let ri = 0;
-      function renderRowsReducidas(){
-        if(!BUSQUEDA_ACTIVA) return;
-        const end = Math.min(ri + RENDER_BATCH, encontradas.length);
-        const frag = document.createDocumentFragment();
-        for(let j = ri; j < end; j++){
-          const r = encontradas[j];
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${escapeHtml(r.buscada)}</td><td class="match">${escapeHtml(r.nombre)}</td><td>${escapeHtml(r.proveedor)}</td>`;
-          frag.appendChild(tr);
-        }
-        tbody.appendChild(frag);
-        ri = end;
-        const pctRender = Math.round((ri / encontradas.length) * 100);
-        progresoEl.innerText = `Renderizando coincidencias: ${pctRender}% (${ri}/${encontradas.length})`;
-        barraFill.style.width = pctRender + "%";
-        if(ri < encontradas.length){
-          setTimeout(renderRowsReducidas, 0);
-        } else {
-          finalizar();
-        }
-      }
-      renderRowsReducidas();
-
-    } else {
-      const tabla = document.createElement("table");
-      tabla.innerHTML = `<thead><tr><th>Oficina buscada</th><th>Coincidencias en Base de Datos</th></tr></thead><tbody></tbody>`;
-      resultado.appendChild(tabla);
-      const tbody = tabla.querySelector("tbody");
-
-      const map = new Map();
-      encontradas.forEach(r => {
-        const k = r.buscada;
-        if(!map.has(k)) map.set(k, []);
-        map.get(k).push(`${escapeHtml(r.nombre)} — <strong>${escapeHtml(r.proveedor)}</strong>`);
-      });
-
-      let ri = 0;
-      function renderRowsNormal(){
-        if(!BUSQUEDA_ACTIVA) return;
-        const end = Math.min(ri + RENDER_BATCH, entradas.length);
-        const frag = document.createDocumentFragment();
-        for(let j = ri; j < end; j++){
-          const e = entradas[j];
-          const lista = map.get(e.original);
-          const tr = document.createElement("tr");
-          if(!lista || lista.length === 0){
-            tr.innerHTML = `<td>${escapeHtml(e.original)}</td><td class="no-match">❌ No encontrada</td>`;
-          } else {
-            tr.innerHTML = `<td>${escapeHtml(e.original)}</td><td class="match">✅<br>${lista.join("<br>")}</td>`;
-          }
-          frag.appendChild(tr);
-        }
-        tbody.appendChild(frag);
-        ri = end;
-        const pctRender = Math.round((ri / entradas.length) * 100);
-        progresoEl.innerText = `Renderizando resultados: ${pctRender}% (${ri}/${entradas.length})`;
-        barraFill.style.width = pctRender + "%";
-        if(ri < entradas.length){
-          setTimeout(renderRowsNormal, 0);
-        } else {
-          finalizar();
-        }
-      }
-      renderRowsNormal();
-    }
-  }
-
-  function finalizar(){
-    BUSQUEDA_ACTIVA = false;
-    document.getElementById("btnBuscar").disabled = false;
-    document.getElementById("btnCancelar").disabled = true;
-    document.getElementById("barraProgreso").style.display = "none";
-    document.getElementById("progresoBusqueda").innerText += " — Listo.";
-  }
-
-  setTimeout(procesarBatch, 0);
-}
-
 // ==========================================
 // 6. BÚSQUEDA POR ARCHIVOS Y DESCARGAS
 // ==========================================
@@ -665,14 +450,15 @@ function handleDrop(e) {
 }
 
 function handleFiles(files) {
+    archivosSubidos = Array.from(files); // siempre sincronizar la lista
     const count = files.length;
     if (fileCounter) {
         if (count > 0) {
             fileCounter.innerText = `${count} archivo(s) seleccionado(s)`;
-            fileCounter.style.background = "#00b894"; 
+            fileCounter.style.background = "#00b894";
         } else {
             fileCounter.innerText = "Ningún archivo seleccionado";
-            fileCounter.style.background = ""; 
+            fileCounter.style.background = "";
         }
     }
 }

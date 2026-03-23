@@ -22,7 +22,7 @@ export function generar() {
   const puesto = document.getElementById("puesto").value;
 
   if (!usuario || isNaN(usuario)) {
-    alert("La clave de usuario debe ser numérica y no estar vacía");
+    window.mostrarAviso('Campo inválido', 'La clave de usuario debe ser numérica y no estar vacía.', 'advertencia');
     return;
   }
 
@@ -79,7 +79,7 @@ export function prepararPoliticas() {
   const resultados = obtenerResultados();
   
   if (resultados.length === 0) {
-    alert("Primero debes generar una clave.");
+    window.mostrarAviso('Sin datos', 'Primero debes generar una clave.', 'advertencia');
     return;
   }
   const primeraClave = resultados[0].Clave;

@@ -5,52 +5,13 @@ import { generar, prepararPoliticas } from "./generador.js";
 
 import { descargarExcel, descargarWord, descargarArchivoOriginal } from "./exportaciones.js";
 
-// ==========================================
-// 1. FUNCIONES INTERNAS DE LA TABLA
-// ==========================================
-function actualizarTablaManuales() {
-  const tbody = document.getElementById("tablaManualesBody");
-  if (!tbody) return;
-  tbody.innerHTML = ""; 
-  const ultimasOficinas = oficinas.slice(-15).reverse();
-  ultimasOficinas.forEach(oficina => {
-    const fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td><strong>${oficina.clave}</strong></td>
-      <td>${oficina.nombre}</td>
-      <td>${oficina.nomenclatura}</td>
-      <td>${oficina.direccion}</td>
-      <td>
-        <button class="btn-edit" onclick="window.cargarOficinaAlFormulario('${oficina.clave}')">📝 Corregir</button>
-      </td>
-    `;
-    tbody.appendChild(fila);
-  });
-}
-
-function actualizarTablaModal(filtro = "") {
-    const tbody = document.getElementById("tablaModalBody");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-    const busqueda = filtro.toLowerCase();
-
-    const lista = oficinas.filter(o => 
-        o.nombre.toLowerCase().includes(busqueda) || 
-        o.clave.includes(busqueda)
-    ).slice(0, 30); 
-
-    lista.forEach(oficina => {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-            <td><b>${oficina.clave}</b></td>
-            <td>${oficina.nombre}</td>
-            <td>${oficina.nomenclatura}</td>
-            <td>
-                <button class="btn-edit" onclick="window.cargarOficinaAlFormulario('${oficina.clave}')">📝 Corregir</button>
-            </td>
-        `;
-        tbody.appendChild(fila);
-    });
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 // ==========================================
@@ -151,7 +112,6 @@ async function guardarOficinaManual() {
       document.getElementById("newDireccion").value = "";
       
       cargarSelectDirecciones();
-      actualizarTablaManuales();
     } else {
       window.mostrarAviso("Error", "No se pudo guardar en GitHub. Verifica tu conexión.", "error");
     }
@@ -178,24 +138,6 @@ window.onload = async () => {
     window.descargarWord = descargarWord;
     window.irAPoliticas = prepararPoliticas;
     window.guardarOficinaManual = guardarOficinaManual; 
-
-    window.mostrarBuscadorCorreccion = function() {
-        const modal = document.getElementById("modalCorreccion");
-        if (modal) {
-            modal.style.display = "flex";
-            actualizarTablaModal(); 
-        }
-    };
-
-    window.cerrarModal = function() {
-        const modal = document.getElementById("modalCorreccion");
-        if (modal) modal.style.display = "none";
-    };
-
-    window.filtrarTablaModal = function() {
-        const texto = document.getElementById("buscadorModal").value;
-        actualizarTablaModal(texto);
-    };
 
 window.cargarOficinaAlFormulario = function(clave) {
     const oficina = oficinas.find(o => o.clave === clave);
@@ -231,7 +173,7 @@ window.cargarOficinaAlFormulario = function(clave) {
     }
 };
 
-    console.log("✅ Sistema vinculado con Modales Custom");
+    console.log("✅ Sistema listo");
   } catch (error) {
     console.error("❌ Error inicial:", error);
     window.mostrarAviso("Error Crítico", "No se pudo cargar la base de oficinas.", "error");
@@ -347,9 +289,9 @@ window.setupBuscadorAdmin = function() {
             resDiv.style.display = "block";
             resDiv.innerHTML = coincidencias.map(of => `
                 <div class="opcion-admin" 
-                     onclick="window.seleccionarOficinaAdmin('${of.clave}')"
+                     onclick="window.seleccionarOficinaAdmin('${escapeHtml(of.clave)}')"
                      style="padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1); transition: 0.2s;">
-                    <span style="color: var(--accent); font-weight: bold;">${of.clave}</span> - ${of.nombre}
+                    <span style="color: var(--accent); font-weight: bold;">${escapeHtml(of.clave)}</span> - ${escapeHtml(of.nombre)}
                 </div>
             `).join("");
         } else {

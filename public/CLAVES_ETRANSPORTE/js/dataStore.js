@@ -40,94 +40,64 @@ export async function cargarOficinas() {
   }
 }
 
-// Configuración de GitHub
-const GITHUB_TOKEN = "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";
-const REPO_OWNER = "EdgarMisaelOsornio";
-const REPO_NAME = "SERVICE-DESK-";
-const FILE_PATH = "public/CLAVES_ETRANSPORTE/OFICINAS NOMENCLATURAS.xlsx";
-
-// Función para guardar (con la lógica de GitHub)
+// ─── Función para guardar (usando el proxy seguro /api/github) ───
 export async function agregarOficinaAlStore(nuevaOficina) {
   try {
     let claveNorm = nuevaOficina.clave.trim().toUpperCase();
     if (/^\d+$/.test(claveNorm)) claveNorm = claveNorm.padStart(4, "0");
 
-    // 1. Obtener metadatos de GitHub (SHA)
-    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-    const resMetadata = await fetch(url, {
-      headers: { "Authorization": `token ${GITHUB_TOKEN}` }
-    });
-    const fileMetadata = await resMetadata.json();
-    if (!fileMetadata.sha) throw new Error("No se pudo obtener el SHA del archivo");
+    const FILE_PATH = "public/CLAVES_ETRANSPORTE/OFICINAS NOMENCLATURAS.xlsx";
 
-    // 2. Descargar contenido actual del Excel
-    const excelRes = await fetch(fileMetadata.download_url);
+    // 1. Obtener SHA y download_url desde el proxy (el token vive en el servidor)
+    const metaRes = await fetch(`/api/github?file=${encodeURIComponent(FILE_PATH)}`);
+    if (!metaRes.ok) throw new Error("No se pudo obtener metadatos del archivo");
+    const { sha, download_url } = await metaRes.json();
+
+    // 2. Descargar el Excel actual
+    const excelRes = await fetch(download_url);
     const arrayBuffer = await excelRes.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
+    let dataJSON = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-    // 3. Convertir a JSON para manipular los datos
-    let dataJSON = XLSX.utils.sheet_to_json(worksheet);
-
-    // 🔍 BUSCAR SI LA CLAVE YA EXISTE
-    // Normalizamos la búsqueda para que coincida con el formato del Excel
+    // 3. Buscar si la clave ya existe
     const index = dataJSON.findIndex(o => {
-        let c = String(o.CLAVE || "").trim().toUpperCase();
-        if (/^\d+$/.test(c)) c = c.padStart(4, "0");
-        return c === claveNorm;
+      let c = String(o.CLAVE || "").trim().toUpperCase();
+      if (/^\d+$/.test(c)) c = c.padStart(4, "0");
+      return c === claveNorm;
     });
 
-    let mensajeCommit = "";
+    const nuevaFila = {
+      CLAVE: claveNorm,
+      NOMBRE: nuevaOficina.nombre.trim().toUpperCase(),
+      NOMENCLATURA: nuevaOficina.nomenclatura.trim().toUpperCase(),
+      DIRECCION: nuevaOficina.direccion.trim().toUpperCase()
+    };
 
-    if (index !== -1) {
-      // 📝 SI EXISTE: Actualizamos esa fila (CORRECCIÓN)
-      dataJSON[index] = {
-        CLAVE: claveNorm,
-        NOMBRE: nuevaOficina.nombre.trim().toUpperCase(),
-        NOMENCLATURA: nuevaOficina.nomenclatura.trim().toUpperCase(),
-        DIRECCION: nuevaOficina.direccion.trim().toUpperCase()
-      };
-      mensajeCommit = `🔧 Corrección de oficina: ${nuevaOficina.nombre}`;
-    } else {
-      // ✨ SI NO EXISTE: La agregamos al final (NUEVA)
-      dataJSON.push({
-        CLAVE: claveNorm,
-        NOMBRE: nuevaOficina.nombre.trim().toUpperCase(),
-        NOMENCLATURA: nuevaOficina.nomenclatura.trim().toUpperCase(),
-        DIRECCION: nuevaOficina.direccion.trim().toUpperCase()
-      });
-      mensajeCommit = `✅ Añadida oficina: ${nuevaOficina.nombre}`;
-    }
+    const mensajeCommit = index !== -1
+      ? `🔧 Corrección de oficina: ${nuevaOficina.nombre}`
+      : `✅ Añadida oficina: ${nuevaOficina.nombre}`;
 
-    // 4. Convertir de vuelta a Excel
+    if (index !== -1) dataJSON[index] = nuevaFila;
+    else dataJSON.push(nuevaFila);
+
+    // 4. Convertir de vuelta a Excel (base64)
     const newWorksheet = XLSX.utils.json_to_sheet(dataJSON);
     workbook.Sheets[sheetName] = newWorksheet;
     const outExcel = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
 
-    // 5. Commit a GitHub
-    const commitRes = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Authorization": `token ${GITHUB_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: mensajeCommit,
-        content: outExcel,
-        sha: fileMetadata.sha
-      })
+    // 5. Commit via proxy (el token nunca sale al navegador)
+    const commitRes = await fetch('/api/github', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: FILE_PATH, sha, content: outExcel, message: mensajeCommit })
     });
 
-    // Retornamos si fue una actualización o una creación para avisar en el alert de main.js
-    if (commitRes.ok) {
-        return (index !== -1) ? "actualizado" : "creado";
-    } else {
-        return "error";
-    }
+    if (commitRes.ok) return index !== -1 ? "actualizado" : "creado";
+    return "error";
 
   } catch (error) {
-    console.error("Error en sincronización con GitHub:", error);
+    console.error("Error en sincronización:", error);
     return "error";
   }
 }

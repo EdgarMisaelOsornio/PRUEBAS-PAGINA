@@ -3,11 +3,6 @@
 // ==========================================
 export let officeData = [];
 
-const GITHUB_TOKEN = "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";
-const REPO_OWNER = "EdgarMisaelOsornio";
-const REPO_NAME = "SERVICE-DESK-";
-const FILE_PATH = "public/CLAVES_SEDENA/AGENCIAS.xlsx"; 
-
 export async function cargarAgencias() {
     const excelURL = `${window.location.origin}/CLAVES_SEDENA/AGENCIAS.xlsx`;
     try {
@@ -32,11 +27,15 @@ export async function cargarAgencias() {
 
 export async function guardarAgenciaAlStore(agencia) {
     try {
-        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-        const resMetadata = await fetch(url, { headers: { "Authorization": `token ${GITHUB_TOKEN}` } });
-        const fileMetadata = await resMetadata.json();
+        const FILE_PATH = "public/CLAVES_SEDENA/AGENCIAS.xlsx";
 
-        const excelRes = await fetch(fileMetadata.download_url);
+        // 1. Obtener SHA via proxy (token seguro en servidor)
+        const metaRes = await fetch(`/api/github?file=${encodeURIComponent(FILE_PATH)}`);
+        if (!metaRes.ok) throw new Error("No se pudo obtener metadatos");
+        const { sha, download_url } = await metaRes.json();
+
+        // 2. Descargar Excel actual
+        const excelRes = await fetch(download_url);
         const arrayBuffer = await excelRes.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         let dataJSON = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
@@ -53,19 +52,26 @@ export async function guardarAgenciaAlStore(agencia) {
         if (index !== -1) dataJSON[index] = nuevaFila;
         else dataJSON.push(nuevaFila);
 
+        // 3. Convertir de vuelta a Excel
         const newWorksheet = XLSX.utils.json_to_sheet(dataJSON);
         workbook.Sheets[workbook.SheetNames[0]] = newWorksheet;
         const outExcel = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
 
-        const commitRes = await fetch(url, {
-            method: "PUT",
-            headers: { "Authorization": `token ${GITHUB_TOKEN}`, "Content-Type": "application/json" },
+        // 4. Commit via proxy
+        const commitRes = await fetch('/api/github', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message: `⚙️ Gestión SEDENA: ${agencia.numero}`,
+                file: FILE_PATH,
+                sha,
                 content: outExcel,
-                sha: fileMetadata.sha
+                message: `⚙️ Gestión SEDENA: ${agencia.numero}`
             })
         });
+
         return commitRes.ok ? (index !== -1 ? "actualizado" : "creado") : "error";
-    } catch (error) { return "error"; }
+    } catch (error) {
+        console.error("Error al guardar agencia:", error);
+        return "error";
+    }
 }

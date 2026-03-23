@@ -1,5 +1,14 @@
 import { oficinas } from "./dataStore.js";
 
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function iniciarBuscador() {
   const inputBuscador = document.getElementById("buscar");
   const boxResultados = document.getElementById("resultadosBusqueda");
@@ -48,10 +57,10 @@ export function iniciarBuscador() {
 
     boxResultados.style.display = "block";
     boxResultados.innerHTML = coincidencias.map(r => `
-      <div class="search-item" data-clave="${r.clave}">
-        <b>${r.clave}</b> — ${r.nombre}
+      <div class="search-item" data-clave="${escapeHtml(r.clave)}">
+        <b>${escapeHtml(r.clave)}</b> — ${escapeHtml(r.nombre)}
         <br>
-        <small>${r.nomenclatura} | ${r.direccion}</small>
+        <small>${escapeHtml(r.nomenclatura)} | ${escapeHtml(r.direccion)}</small>
       </div>
     `).join("");
   });

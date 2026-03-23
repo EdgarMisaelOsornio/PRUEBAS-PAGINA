@@ -37,93 +37,59 @@ export async function cargarPantallas() {
   }
 }
 
-// Configuración de GitHub (Usando tus credenciales actuales)
-// ⚠️ NOTA DE SEGURIDAD: Te recomiendo en el futuro generar un token nuevo, ya que este quedó expuesto en el chat.
-const GITHUB_TOKEN = "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";
-const REPO_OWNER = "EdgarMisaelOsornio";
-const REPO_NAME = "SERVICE-DESK-";
-
-// ⚠️ IMPORTANTE: Ajusta esta ruta a la ubicación exacta de VIDEOWALLS.xlsx en tu repositorio
-const FILE_PATH = "public/VIDEOWALLS/VIDEOWALLS.xlsx";
-
-// Función para guardar/actualizar en GitHub
+// ─── Función para guardar/actualizar (usando proxy seguro /api/github) ───
 export async function agregarPantallaAlStore(nuevaPantalla) {
   try {
-    let codigoNorm = nuevaPantalla.codigo.trim().toUpperCase();
+    const codigoNorm = nuevaPantalla.codigo.trim().toUpperCase();
+    const FILE_PATH  = "public/VIDEOWALLS/VIDEOWALLS.xlsx";
 
-    // 1. Obtener metadatos de GitHub (SHA)
-    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-    const resMetadata = await fetch(url, {
-      headers: { "Authorization": `token ${GITHUB_TOKEN}` }
-    });
-    
-    const fileMetadata = await resMetadata.json();
-    if (!fileMetadata.sha) throw new Error("No se pudo obtener el SHA del archivo de Videowalls");
+    // 1. Obtener SHA y download_url via proxy (token seguro en el servidor)
+    const metaRes = await fetch(`/api/github?file=${encodeURIComponent(FILE_PATH)}`);
+    if (!metaRes.ok) throw new Error("No se pudo obtener metadatos del archivo de Videowalls");
+    const { sha, download_url } = await metaRes.json();
 
-    // 2. Descargar contenido actual del Excel
-    const excelRes = await fetch(fileMetadata.download_url);
+    // 2. Descargar el Excel actual
+    const excelRes    = await fetch(download_url);
     const arrayBuffer = await excelRes.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
+    const workbook    = XLSX.read(arrayBuffer, { type: 'array' });
+    const sheetName   = workbook.SheetNames[0];
+    let dataJSON      = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-    // 3. Convertir a JSON para manipular los datos
-    let dataJSON = XLSX.utils.sheet_to_json(worksheet);
+    // 3. Buscar si el código ya existe
+    const index = dataJSON.findIndex(p =>
+      String(p.CODIGO || "").trim().toUpperCase() === codigoNorm
+    );
 
-    // 🔍 BUSCAR SI EL CÓDIGO YA EXISTE EN EL EXCEL
-    const index = dataJSON.findIndex(p => {
-        let c = String(p.CODIGO || "").trim().toUpperCase();
-        return c === codigoNorm;
-    });
+    const nuevaFila = {
+      CODIGO:    codigoNorm,
+      SALA:      nuevaPantalla.sala.trim().toUpperCase(),
+      PROVEEDOR: nuevaPantalla.proveedor.trim().toUpperCase()
+    };
 
-    let mensajeCommit = "";
+    const mensajeCommit = index !== -1
+      ? `🔧 Corrección de pantalla/proveedor: ${codigoNorm}`
+      : `✅ Añadida nueva pantalla: ${codigoNorm}`;
 
-    if (index !== -1) {
-      // 📝 SI EXISTE: Actualizamos esa fila (CORRECCIÓN / CAMBIO DE PROVEEDOR)
-      dataJSON[index] = {
-        CODIGO: codigoNorm,
-        SALA: nuevaPantalla.sala.trim().toUpperCase(),
-        PROVEEDOR: nuevaPantalla.proveedor.trim().toUpperCase()
-      };
-      mensajeCommit = `🔧 Corrección de pantalla/proveedor: ${codigoNorm}`;
-    } else {
-      // ✨ SI NO EXISTE: La agregamos al final (NUEVA PANTALLA)
-      dataJSON.push({
-        CODIGO: codigoNorm,
-        SALA: nuevaPantalla.sala.trim().toUpperCase(),
-        PROVEEDOR: nuevaPantalla.proveedor.trim().toUpperCase()
-      });
-      mensajeCommit = `✅ Añadida nueva pantalla: ${codigoNorm}`;
-    }
+    if (index !== -1) dataJSON[index] = nuevaFila;
+    else dataJSON.push(nuevaFila);
 
-    // 4. Convertir de vuelta a Excel
+    // 4. Convertir de vuelta a Excel (base64)
     const newWorksheet = XLSX.utils.json_to_sheet(dataJSON);
     workbook.Sheets[sheetName] = newWorksheet;
     const outExcel = XLSX.write(workbook, { type: 'base64', bookType: 'xlsx' });
 
-    // 5. Enviar el Commit a GitHub
-    const commitRes = await fetch(url, {
-      method: "PUT",
-      headers: {
-        "Authorization": `token ${GITHUB_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: mensajeCommit,
-        content: outExcel,
-        sha: fileMetadata.sha
-      })
+    // 5. Commit via proxy
+    const commitRes = await fetch('/api/github', {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: FILE_PATH, sha, content: outExcel, message: mensajeCommit })
     });
 
-    // Retornamos si fue creación o actualización para el mensajito verde
-    if (commitRes.ok) {
-        return (index !== -1) ? "actualizado" : "creado";
-    } else {
-        return "error";
-    }
+    if (commitRes.ok) return index !== -1 ? "actualizado" : "creado";
+    return "error";
 
   } catch (error) {
-    console.error("Error en sincronización con GitHub:", error);
+    console.error("Error en sincronización de Videowalls:", error);
     return "error";
   }
 }
