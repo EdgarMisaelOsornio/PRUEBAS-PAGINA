@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/png" href="/logo.jpg">
+    <title>Videowalls | Service Desk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/shared/service-desk-theme.css">
+    <style>
+        /* ── Modal de Correos ── */
+        .modal-proveedores { display: none; }
+        .prov-block {
+            background: rgba(15, 118, 110,0.06);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+        .prov-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .prov-block-nombre {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--accent);
+        }
+        .prov-email-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            transition: background 0.2s;
+        }
+        .prov-email-row:hover { background: rgba(255,255,255,0.05); }
+        .btn-del-email {
+            background: rgba(234,84,85,0.15);
+            border: 1px solid rgba(234,84,85,0.4);
+            color: #ea5455;
+            border-radius: 6px;
+            padding: 3px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        .btn-del-email:hover { background: rgba(234,84,85,0.3); }
+        .add-email-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .add-email-row input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--primary-text);
+            font-size: 0.85rem;
+        }
+        .btn-add-email {
+            background: rgba(40,199,111,0.15);
+            border: 1px solid rgba(40,199,111,0.4);
+            color: #28c76f;
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+        .btn-add-email:hover { background: rgba(40,199,111,0.3); }
+        .btn-nuevo-proveedor {
+            width: 100%;
+            margin-top: 10px;
+            background: rgba(15, 118, 110,0.12);
+            border: 1px dashed var(--accent);
+            color: var(--accent);
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-nuevo-proveedor:hover { background: rgba(15, 118, 110,0.25); }
+    </style>
+</head>
+<body class="module-page module-videowalls">
+
+    <nav class="navbar">
+        <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+        <div class="nav-right">
+            <button class="nav-btn-header" onclick="toggleFormularioPantalla()">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="nav-text">Agregar o editar pantalla</span>
+            </button>
+            <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span><span class="nav-text">Inicio</span>
+            </button>
+            <button class="dark-toggle" onclick="toggleDarkMode()" id="themeBtn" aria-label="Activar modo oscuro">
+              <span class="theme-icon theme-icon-moon"><svg viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 9 9 0 1 0 20.5 14.2Z"/></svg></span>
+              <span class="theme-icon theme-icon-sun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>
+            </button>
+        </div>
+    </nav>
+
+    <header>
+        <h1>Buscador y Organizador de Videowalls</h1>
+        <p class="subtitle">Gestión centralizada de pantallas y contactos de proveedores</p>
+    </header>
+
+    <!-- ══════════════════════════════════════════
+         MODAL: Agregar / Editar Pantalla (Excel)
+    ══════════════════════════════════════════ -->
+    <div id="secAgregarPantalla" class="modal-overlay">
+        <div class="modal-content-custom">
+            <div class="modal-header">
+                <h3 style="margin:0;">⚙️ Gestión de Videowalls</h3>
+                <button class="btn-close-modal" onclick="toggleFormularioPantalla()">×</button>
+            </div>
+            <div style="margin-bottom: 20px; padding: 15px; background: rgba(15, 118, 110,0.1); border-radius: 12px; border: 1px solid var(--accent);">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">¿Quieres modificar uno existente?</label>
+                <select id="selectorExistentes" onchange="cargarDatosEnFormulario(this.value)" class="modal-input" style="background: var(--glass-bg); cursor: pointer;">
+                    <option value="">-- Selecciona una oficina para editar --</option>
+                </select>
+                <p style="font-size: 0.75rem; margin-top: 5px; opacity: 0.8;">* Si es nuevo, ignora esto y escribe abajo.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; font-weight: bold;">Código de Archivo</label>
+                    <input type="text" id="newCodigo" placeholder="Ej: MXN1A" class="modal-input">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.85rem; font-weight: bold;">Proveedor</label>
+                    <input type="text" id="newProveedor" placeholder="Ej: MAX" class="modal-input">
+                </div>
+                <div class="form-group full">
+                    <label style="font-size: 0.85rem; font-weight: bold;">Ubicación / Sala</label>
+                    <input type="text" id="newSala" placeholder="Ej: MEXICO NORTE SALA 1" class="modal-input">
+                </div>
+            </div>
+            <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="limpiarFormulario()" style="background: rgba(255,255,255,0.05); color: var(--primary-text); border: 1px solid var(--glass-border); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Limpiar</button>
+                <button id="btnGuardarPantalla" onclick="guardarPantalla()" style="background: #28c76f; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    💾 Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         MODAL: Editar Correos de Proveedores
+    ══════════════════════════════════════════ -->
+    <div id="secEditarProveedores" class="modal-overlay modal-proveedores">
+        <div class="modal-content-custom" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 style="margin:0;">📧 Editar Correos de Proveedores</h3>
+                <button class="btn-close-modal" onclick="cerrarModalProveedores()">×</button>
+            </div>
+
+            <p style="font-size: 0.82rem; opacity: 0.7; margin-bottom: 16px;">
+                Los cambios se guardan directamente en GitHub. La tabla se actualizará al cerrar este editor.
+            </p>
+
+            <!-- Aquí se renderizan los bloques de proveedor -->
+            <div id="listaProveedoresEdit"></div>
+
+            <!-- Agregar nuevo proveedor -->
+            <button class="btn-nuevo-proveedor" onclick="agregarNuevoProveedor()">
+                ➕ Agregar nuevo proveedor
+            </button>
+
+            <div style="margin-top: 25px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="cerrarModalProveedores()" style="background: rgba(255,255,255,0.05); color: var(--primary-text); border: 1px solid var(--glass-border); padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancelar</button>
+                <button id="btnGuardarProveedores" onclick="guardarCambiosProveedores()" style="background: #28c76f; color: white; border: none; padding: 10px 22px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                    💾 Guardar cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container fade-in">
+
+        <!-- SECCIÓN 1 -->
+        <div class="section-card">
+            <div class="section-title">
+                <span class="step-badge">1</span>
+                <h3>Buscar proveedor por oficina</h3>
+            </div>
+            <textarea id="buscadorProveedor" placeholder="Ejemplo:
+            MEXICO NORTE
+            ACAPULCO, PAPAGAYO
+            CD. JUAREZ
+
+            Tip: Puedes pegar varias oficinas (una por línea)" oninput="debounceBuscarProveedor()"></textarea>
+            <div class="button-group">
+                <button class="primary" onclick="buscarProveedorPorOficina()">Buscar proveedor</button>
+                <button class="ghost" onclick="limpiarBuscadorProveedor()">Limpiar</button>
+            </div>
+            <div id="resultadoProveedor" class="result-area"></div>
+        </div>
+
+        <!-- SECCIÓN 2 -->
+        <div class="section-card">
+            <div class="section-title">
+                <span class="step-badge">2</span>
+                <h3>Buscar por archivos CSV</h3>
+            </div>
+            <div class="upload-container" id="drop-area">
+                <input type="file" id="archivos" multiple accept=".csv" onchange="handleFiles(this.files)">
+                <div class="upload-content">
+                    <span class="upload-icon">📁</span>
+                    <p><strong>Haz clic para elegir</strong> o arrastra tus archivos CSV aquí</p>
+                    <span id="file-counter" class="file-counter">Ningún archivo seleccionado</span>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="primary" onclick="buscarPorArchivos()">Procesar archivos</button>
+                <button class="success" onclick="descargarZip()">Descargar ZIP por proveedor</button>
+            </div>
+            <div id="resultadoArchivos" class="result-area"></div>
+        </div>
+
+        <!-- SECCIÓN 3: Contactos (tabla dinámica) -->
+        <div class="section-card">
+            <div class="section-title" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style="display:flex; align-items:center; gap: 12px;">
+                    <span class="step-badge">3</span>
+                    <h3>Contactos de Proveedores</h3>
+                </div>
+                <button onclick="abrirModalProveedores()" style="background: rgba(15, 118, 110,0.15); border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.85rem;">
+                    Editar correos
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="corporate-table">
+                    <thead>
+                        <tr>
+                            <th>Proveedor</th>
+                            <th>Correos de Contacto (Directos)</th>
+                        </tr>
+                    </thead>
+                    <!-- JS renderiza las filas aquí -->
+                    <tbody id="tablaContactosCuerpo"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="customSelect.js"></script>
+    <script type="module" src="script.js"></script>
+    <script>
+        // Inicializar el custom select cuando el modal se abra por primera vez
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esperar a que el módulo cargue e inicializar
+            setTimeout(function() {
+                window.initCustomSelect('selectorExistentes', {
+                    placeholder: '-- Selecciona una oficina para editar --',
+                    searchable: true
+                });
+            }, 300);
+        });
+    </script>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('videowalls-theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeBtn').setAttribute('aria-label', isDark ? 'Activar modo claro' : 'Activar modo oscuro');
+        }
+        if (localStorage.getItem('videowalls-theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeBtn').setAttribute('aria-label', 'Activar modo claro');
+        }
+    </script>
+
+    <footer>
+        © 2026 Verificador de Videowalls — Desarrollado por ServiceDesk
+    </footer>
+
+    <div id="toast-container" class="toast-container"></div>
+</body>
+</html>

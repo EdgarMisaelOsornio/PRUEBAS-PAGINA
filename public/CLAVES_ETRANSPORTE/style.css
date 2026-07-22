@@ -1,0 +1,1250 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.82);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --primary-text: #2d3436;
+    --accent: #0f766e;
+    --shadow: 0 20px 50px rgba(0,0,0,0.05);
+}
+
+.dark-mode {
+    --bg-gradient: linear-gradient(135deg, #071318 0%, #0a2029 50%, #0e2b33 100%);
+    --glass-bg: rgba(20, 20, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --primary-text: #ffffff;
+    --accent: #2dd4bf;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+
+    zoom: 0.75; 
+    -moz-transform: scale(0.8);
+    -moz-transform-origin: top center;
+    
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--primary-text);
+    transition: all 0.5s ease;
+}
+
+/* NAVBAR */
+.navbar {
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo { font-weight: 800; font-size: 1.3rem; letter-spacing: -1px; text-transform: uppercase; }
+
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+/* Botón Inicio y Dark Mode unificados */
+.nav-btn-header, .dark-toggle {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: var(--primary-text);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+    font-family: inherit;
+}
+
+.nav-btn-header:hover, .dark-toggle:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* CONTAINER */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    padding: 40px;
+    border-radius: 32px;
+    box-shadow: var(--shadow);
+}
+
+header { text-align: center; margin: 40px 0; }
+header h1 { font-size: 2.2rem; font-weight: 800; }
+.subtitle { opacity: 0.7; }
+
+/* FORMS */
+.form-group { margin-bottom: 20px; }
+label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
+
+textarea, input, select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--primary-text);
+    font-family: inherit;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.dark-mode textarea, .dark-mode input, .dark-mode select {
+    background: rgba(15, 15, 25, 0.97);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+textarea:focus, input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.dark-mode textarea:focus, .dark-mode input:focus, .dark-mode select:focus {
+    background: rgba(15, 15, 25, 0.97);
+}
+
+.dark-mode select option {
+    background-color: rgb(18, 18, 30);
+    color: var(--primary-text);
+}
+
+select option {
+    background-color: #ffffff;
+    color: #2d3436;
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* BUTTONS */
+.buttons { display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap; }
+button:not(.nav-btn-header):not(.dark-toggle) {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button.primary { background: var(--accent); color: white; }
+button.success { background: #00b894; color: white; }
+button.info { background: #0984e3; color: white; }
+
+
+
+
+/* OUTPUT */
+pre {
+    background: rgba(0,0,0,0.05);
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    white-space: pre-wrap;
+    color: var(--primary-text);
+    font-family: 'Courier New', monospace;
+}
+
+.dark-mode pre { background: rgba(255, 255, 255, 0.05); }
+
+footer { text-align: center; padding: 40px; opacity: 0.6; font-size: 0.85rem; }
+
+@media (max-width: 768px) {
+    .form-row { grid-template-columns: 1fr; }
+    .nav-text { display: none; }
+}
+/* 1. EL CONTENEDOR (La caja con slider) */
+#resultadosBusqueda {
+    position: relative;
+    width: 100%;
+    z-index: 1000;
+
+    /* ESPEJO: fondo casi inexistente */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.28),
+        rgba(255, 255, 255, 0.04)
+    );
+
+    backdrop-filter: blur(45px) saturate(220%) brightness(115%);
+    -webkit-backdrop-filter: blur(45px) saturate(220%) brightness(115%);
+
+    /* filo de cristal */
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 22px;
+
+    margin-top: 15px;
+    margin-bottom: 30px;
+
+    /* reflejo interno + separación */
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 2px rgba(255, 255, 255, 0.25),
+        0 20px 50px rgba(0, 0, 0, 0.25);
+
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 12px;
+    display: none;
+}
+
+
+
+.search-section {
+    position: relative;
+    margin-bottom: 30px; /* Aumentamos el espacio inferior */
+}
+/* 2. DISEÑO DE CADA ITEM (Los resultados inyectados) */
+.search-item {
+    padding: 12px 16px;
+    margin-bottom: 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--primary-text);
+    border: 1px solid transparent;
+    line-height: 1.4;
+}
+
+/* Estilo del texto dentro del item (basado en tu JS) */
+.search-item b {
+    color: var(--accent);
+    font-size: 1rem;
+    transition: 0.2s;
+}
+
+.search-item small {
+    opacity: 0.7;
+    font-size: 0.8rem;
+    display: block; /* Para que la dirección baje */
+    margin-top: 2px;
+}
+
+/* 3. EFECTO HOVER (Selección) */
+.search-item:hover {
+    background: var(--accent);
+    border-color: var(--glass-border);
+    transform: translateX(5px);
+}
+
+.search-item:hover b, 
+.search-item:hover small,
+.search-item:hover {
+    color: white !important; /* Todo el texto blanco al seleccionar */
+}
+
+/* 4. PERSONALIZACIÓN DEL SLIDER (SCROLLBAR) */
+#resultadosBusqueda::-webkit-scrollbar {
+    width: 6px;
+}
+
+#resultadosBusqueda::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+#resultadosBusqueda::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    margin: 10px;
+    border-radius: 10px;
+}
+
+/* Estilo para el mensaje "No se encontraron resultados" */
+#resultadosBusqueda p {
+    color: var(--primary-text);
+    opacity: 0.6;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 20px !important;
+}
+
+/* 1. CAJA DE RESULTADO (Estilo Cristalizado Premium) */
+#resultado {
+    /* Fondo ultra-cristalino con gradiente sutil */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 0.03)
+    );
+
+    /* Desenfoque profundo para efecto espejo */
+    backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+
+    /* Filo de cristal brillante */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 24px;
+    
+    /* Espaciado y Sombra */
+    padding: 25px;
+    margin-top: 15px;
+    box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        0 15px 35px rgba(0, 0, 0, 0.1);
+
+    /* LIMITACIÓN Y SLIDER PROPIO */
+    max-height: 400px; /* Altura máxima para activar el slider */
+    overflow-y: auto;  /* Slider vertical automático */
+    overflow-x: hidden; /* Evita slider horizontal si el texto se ajusta */
+    
+    /* Tipografía y texto */
+    white-space: pre-wrap; /* Mantiene saltos de línea y ajusta al ancho */
+    color: var(--primary-text);
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* 2. MODO OSCURO PARA EL RESULTADO */
+.dark-mode #resultado {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.01)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 3. PERSONALIZACIÓN DEL SLIDER (SCROLLBAR) DEL RESULTADO */
+#resultado::-webkit-scrollbar {
+    width: 8px;
+}
+
+#resultado::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+    border: 2px solid transparent; /* Efecto de separación */
+    background-clip: content-box;
+}
+
+#resultado::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    margin: 15px;
+    border-radius: 10px;
+}
+
+/* 4. ESTILO DE ERRORES (Opcional para que combine) */
+#errores {
+    margin-top: 10px;
+    color: #ff7675;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding-left: 10px;
+}
+
+/* =========================================
+   MODAL ADMINISTRACIÓN (GLASSMORPHISM)
+   ========================================= */
+
+/* Fondo oscuro con desenfoque */
+.modal-overlay, .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: none; /* Controlado por JS (flex para centrar) */
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Prioridad para avisos y mensajes */
+#modalMensaje, #modalConfirmacion, #modalCorreccion {
+    z-index: 11000;
+}
+
+/* Contenedor de Cristal */
+.modal-content-custom, .modal-content {
+    background-color: var(--glass-bg);
+    color: var(--primary-text);
+    padding: 35px;
+    border-radius: 28px;
+    width: 95%;
+    max-width: 600px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    animation: slideUp 0.4s ease-out;
+}
+
+/* Grid de Formulario del Modal */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-field label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--primary-text);
+}
+
+/* Inputs y Selects */
+.form-field input, 
+.form-field select, 
+#buscadorRapidoAdmin {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: inherit;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .form-field select,
+.dark-mode #buscadorRapidoAdmin {
+    background: rgba(15, 15, 25, 0.97);
+}
+
+.form-field input:focus, #buscadorRapidoAdmin:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(15, 118, 110, 0.2);
+}
+
+/* Resultados del Buscador Flotante */
+.search-results-custom {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+}
+
+.opcion-admin {
+    transition: 0.2s ease;
+}
+
+.opcion-admin:hover {
+    background: rgba(15, 118, 110, 0.2) !important;
+    padding-left: 15px !important;
+    color: var(--accent);
+}
+
+/* Animaciones */
+@keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Estilo para las opciones del Select (para que se lean en modo oscuro/claro) */
+#selectorOficinas option, 
+#newDireccion option {
+    background-color: rgb(18, 18, 30);
+    color: #eee;
+}
+
+/* Animaciones */
+@keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Ajustes para móviles */
+@media (max-width: 480px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* Una sola columna en móvil */
+    }
+    .modal-content-custom {
+        padding: 20px;
+        width: 98%;
+    }
+}
+
+
+/* =========================================
+   BOTÓN FLOTANTE "AGREGAR OFICINA"
+   ========================================= */
+
+.header-action-btn {
+    position: absolute;
+    top: 20px;          /* Distancia desde el borde superior del header */
+    right: 5%;          /* Distancia desde la derecha (alineado con el margen de la navbar) */
+    
+    background: rgba(255, 255, 255, 0.15); /* Fondo semitransparente */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: var(--primary-text);
+    padding: 10px 20px;
+    border-radius: 12px;
+    
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    
+    backdrop-filter: blur(8px); /* Efecto vidrio */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el icono ➕ y el texto */
+    z-index: 50;
+}
+
+/* Efecto al pasar el mouse */
+.header-action-btn:hover {
+    background: var(--accent); /* Se pinta de morado */
+    color: white;
+    transform: translateY(-3px); /* Flota un poco hacia arriba */
+    box-shadow: 0 8px 25px rgba(15, 118, 110, 0.4);
+    border-color: var(--accent);
+}
+
+/* Efecto al presionar */
+.header-action-btn:active {
+    transform: scale(0.95);
+}
+
+/* Ajuste para celulares (para que no se rompa el diseño) */
+@media (max-width: 768px) {
+    .header-action-btn {
+        position: static; /* Deja de flotar y se pone abajo del título */
+        margin: 15px auto;
+        display: block;
+        width: 80%;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   MODAL ADMINISTRACIÓN DE DIRECCIONES — ESTILOS MEJORADOS
+   ============================================================ */
+
+/* Overlay con animación de entrada */
+#modalDirecciones {
+  animation: modalFadeIn 0.25s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Contenedor principal del modal */
+.modal-dir-box {
+  background: var(--glass-bg);
+  padding: 28px 28px 0 28px;
+  border-radius: 25px;
+  width: 95%;
+  max-width: 920px;
+  border: 1px solid var(--glass-border);
+  position: relative;
+  color: var(--primary-text);
+  max-height: 88vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideUp 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Botón cerrar mejorado */
+.modal-dir-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border);
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: inherit;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.modal-dir-close:hover {
+  background: rgba(234,84,85,0.2);
+  border-color: #ea5455;
+  color: #ea5455;
+  transform: rotate(90deg);
+}
+
+/* Header */
+.modal-dir-header { margin-bottom: 0; padding-bottom: 18px; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; }
+.modal-dir-title  { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+.modal-dir-sub    { opacity: 0.55; font-size: 0.82rem; }
+
+/* ── BODY: dos columnas ── */
+.modal-dir-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Columna izquierda: tabs + paneles */
+.modal-dir-col-form {
+  padding: 20px 24px 24px 0;
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.modal-dir-col-form::-webkit-scrollbar { width: 3px; }
+.modal-dir-col-form::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+/* Columna derecha: lista */
+.modal-dir-col-list {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 20px 0 0 24px;
+}
+
+/* Tabs de navegación */
+.modal-dir-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.tab-dir-btn {
+  padding: 9px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.65;
+}
+.tab-dir-btn:hover { opacity: 1; transform: translateY(-1px); }
+
+/* Tab Agregar — verde */
+.tab-dir-btn.tab-agregar.active {
+  background: #28c76f;
+  border-color: #28c76f;
+  color: white;
+  opacity: 1;
+  box-shadow: 0 4px 15px rgba(40,199,111,0.35);
+}
+/* Tab Editar — naranja */
+.tab-dir-btn.tab-editar.active {
+  background: #f39c12;
+  border-color: #f39c12;
+  color: white;
+  opacity: 1;
+  box-shadow: 0 4px 15px rgba(243,156,18,0.35);
+}
+/* Tab Eliminar — rojo */
+.tab-dir-btn.tab-eliminar.active {
+  background: #ea5455;
+  border-color: #ea5455;
+  color: white;
+  opacity: 1;
+  box-shadow: 0 4px 15px rgba(234,84,85,0.35);
+}
+
+/* Panel */
+.modal-dir-panel { animation: panelFade 0.2s ease; }
+@keyframes panelFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Label */
+.modal-dir-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+  opacity: 0.85;
+}
+
+/* Inputs y selects unificados */
+.modal-dir-input,
+.modal-dir-select {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.88);
+  color: inherit;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 12px;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.92rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.dark-mode .modal-dir-input,
+.dark-mode .modal-dir-select {
+  background: rgba(15, 15, 25, 0.97);
+}
+.modal-dir-input:focus,
+.modal-dir-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110,0.15);
+}
+.modal-dir-input.input-error { border-color: #ea5455 !important; box-shadow: 0 0 0 3px rgba(234,84,85,0.15); }
+.modal-dir-input.input-ok    { border-color: #28c76f !important; box-shadow: 0 0 0 3px rgba(40,199,111,0.12); }
+
+/* Mensaje inline de validación */
+.modal-dir-validation {
+  font-size: 0.78rem;
+  margin-top: 6px;
+  min-height: 18px;
+  transition: all 0.2s;
+}
+.modal-dir-validation.v-error { color: #ea5455; }
+.modal-dir-validation.v-ok    { color: #28c76f; }
+.modal-dir-validation.v-hint  { opacity: 0.5; }
+
+/* Hint box info */
+.modal-dir-info-box {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  margin-top: 12px;
+  border-left: 3px solid var(--accent);
+  background: rgba(15, 118, 110,0.08);
+  display: none;
+}
+
+/* Botón principal de acción */
+.modal-dir-action-btn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px;
+  color: white;
+  border: none;
+  border-radius: 13px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.modal-dir-action-btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-2px); }
+.modal-dir-action-btn:active:not(:disabled) { transform: scale(0.98); }
+.modal-dir-action-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.modal-dir-action-btn.btn-agregar  { background: linear-gradient(135deg,#28c76f,#20a05b); box-shadow: 0 4px 20px rgba(40,199,111,0.3); }
+.modal-dir-action-btn.btn-editar   { background: linear-gradient(135deg,#f39c12,#e67e22); box-shadow: 0 4px 20px rgba(243,156,18,0.3); }
+.modal-dir-action-btn.btn-eliminar { background: linear-gradient(135deg,#ea5455,#c0392b); box-shadow: 0 4px 20px rgba(234,84,85,0.3); }
+
+/* Sección de lista — ocupa toda la columna derecha */
+.modal-dir-list-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 20px;
+}
+
+/* Header de la lista con buscador */
+.modal-dir-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.modal-dir-list-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+  font-weight: 700;
+}
+.modal-dir-search {
+  padding: 6px 12px;
+  background: rgba(0,0,0,0.12);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: inherit;
+  width: 180px;
+  transition: border-color 0.2s, width 0.3s;
+}
+.modal-dir-search:focus {
+  border-color: var(--accent);
+  width: 220px;
+}
+.modal-dir-search::placeholder { opacity: 0.4; }
+
+/* Contenedor de tags — único scroll, ocupa el espacio disponible */
+#listaDireccionesAdmin {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding-right: 4px;
+  align-content: flex-start;
+}
+
+/* Scrollbar elegante en la lista */
+#listaDireccionesAdmin::-webkit-scrollbar { width: 4px; }
+#listaDireccionesAdmin::-webkit-scrollbar-track { background: transparent; }
+#listaDireccionesAdmin::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; opacity: 0.4; }
+
+/* Tag individual */
+.dir-tag {
+  padding: 5px 10px 5px 12px;
+  background: rgba(15, 118, 110,0.1);
+  border: 1px solid rgba(15, 118, 110,0.25);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dir-tag:hover {
+  background: rgba(15, 118, 110,0.22);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(15, 118, 110,0.2);
+}
+.dir-tag .dir-tag-count {
+  background: var(--accent);
+  color: white;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+.dir-tag.dir-tag-hidden { display: none; }
+
+/* Mensaje cuando no hay resultados en búsqueda */
+.modal-dir-no-results {
+  width: 100%;
+  text-align: center;
+  opacity: 0.45;
+  font-size: 0.82rem;
+  padding: 12px 0;
+  display: none;
+}
+
+/* Warning / info del panel eliminar */
+.dir-warning-box {
+  padding: 12px 14px;
+  background: rgba(234,84,85,0.1);
+  border: 1px solid rgba(234,84,85,0.35);
+  border-radius: 12px;
+  font-size: 0.84rem;
+  display: none;
+}
+
+/* Tooltip sobre el tag al hacer hover */
+.dir-tag-tooltip { position: relative; }
+
+/* ── PUESTO COPIABLE ────────────────────────────────────────────────── */
+.puesto-copiable {
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin: -1px -6px;
+  transition: background 0.18s, color 0.18s;
+  position: relative;
+}
+.puesto-copiable:hover {
+  background: rgba(15, 118, 110, 0.18);
+  outline: 1px solid rgba(15, 118, 110, 0.4);
+}
+.puesto-copiable:hover::after {
+  content: "Clic para copiar";
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 50, 0.92);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: 'Segoe UI', sans-serif;
+  border: 1px solid rgba(15, 118, 110,0.3);
+}
+.puesto-copiable.puesto-copiado {
+  background: rgba(40, 199, 111, 0.18);
+  outline: 1px solid rgba(40, 199, 111, 0.5);
+}
+.puesto-copy-icon {
+  font-size: 0.8em;
+  margin-left: 5px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.puesto-copiable:hover .puesto-copy-icon {
+  opacity: 1;
+}
+
+/* Responsive: en móvil vuelve a una sola columna */
+@media (max-width: 640px) {
+  .modal-dir-body {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  .modal-dir-col-form {
+    border-right: none;
+    border-bottom: 1px solid var(--glass-border);
+    padding: 20px 0 20px 0;
+  }
+  .modal-dir-col-list {
+    padding: 20px 0 0 0;
+    max-height: 260px;
+  }
+  .modal-dir-box {
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+}
+
+
+/* ============================================================
+   CUSTOM SELECT — Dropdown con buscador
+   ============================================================ */
+
+.cs-wrapper {
+  position: relative;
+  width: 100%;
+  user-select: none;
+}
+
+/* Trigger — caja visible */
+.cs-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--primary-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 50px;
+  gap: 10px;
+}
+.dark-mode .cs-trigger {
+  background: rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.12);
+}
+.cs-wrapper.cs-open .cs-trigger,
+.cs-trigger:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110,0.15);
+  outline: none;
+}
+
+/* Texto mostrado */
+.cs-display {
+  flex: 1;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.cs-display.cs-has-value {
+  opacity: 1;
+}
+
+/* Flecha */
+.cs-arrow {
+  flex-shrink: 0;
+  opacity: 0.45;
+  transition: transform 0.22s ease, opacity 0.2s;
+  display: flex;
+  align-items: center;
+}
+.cs-wrapper.cs-open .cs-arrow {
+  transform: rotate(180deg);
+  opacity: 0.8;
+}
+
+/* Panel desplegable */
+.cs-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: rgba(15, 15, 25, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  z-index: 9000;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  animation: csPanelIn 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Panel en modo claro */
+body:not(.dark-mode) .cs-panel {
+  background: rgba(245, 245, 252, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+}
+@keyframes csPanelIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cs-wrapper.cs-open .cs-panel {
+  display: block;
+}
+
+/* Buscador dentro del panel */
+.cs-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.dark-mode .cs-search-wrap {
+  background: rgba(15, 15, 25, 0.97);
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+.cs-search-icon {
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+.cs-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--primary-text);
+  font-family: inherit;
+  font-size: 0.87rem;
+}
+.cs-search-input::placeholder { opacity: 0.4; }
+
+/* Lista de opciones */
+.cs-options-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+}
+.cs-options-list::-webkit-scrollbar { width: 4px; }
+.cs-options-list::-webkit-scrollbar-track { background: transparent; }
+.cs-options-list::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; opacity: 0.5; }
+
+/* Opción individual */
+.cs-option {
+  padding: 10px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: background 0.15s;
+}
+.cs-option:hover {
+  background: rgba(15, 118, 110,0.12);
+}
+.cs-option.cs-selected {
+  background: rgba(15, 118, 110,0.18);
+}
+.cs-option.cs-selected .cs-option-label {
+  color: var(--accent);
+}
+.cs-option-empty {
+  opacity: 0.45;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+.cs-option-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--primary-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cs-option-sub {
+  font-size: 0.75rem;
+  opacity: 0.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sin resultados */
+.cs-no-results {
+  display: none;
+  padding: 16px;
+  text-align: center;
+  opacity: 0.4;
+  font-size: 0.83rem;
+}
+
+/* Ajuste para el modal — asegura que el panel quede por encima */
+#modalDirecciones .cs-panel {
+  z-index: 10001;
+}
+
+.cs-wrapper.cs-open-up .cs-panel {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+/* ============================================================
+   MODAL DE OFICINAS — COMPACTO Y SIN DESBORDAMIENTOS
+   ============================================================ */
+#modalAdmin.office-admin-overlay {
+  padding: 24px;
+}
+
+#modalAdmin .office-admin-modal {
+  width: min(780px, 100%);
+  max-width: 780px;
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  overflow: visible;
+}
+
+.office-admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--sd-border, var(--glass-border));
+}
+
+.office-admin-heading { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.office-admin-icon { width: 40px; height: 40px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 11px; color: var(--sd-accent-hover, var(--accent)); background: var(--sd-accent-soft, rgba(15, 118, 110, .1)); }
+.office-admin-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.office-admin-heading h3 { margin: 0; color: var(--sd-text, var(--primary-text)); font-size: 19px; letter-spacing: -.025em; }
+.office-admin-heading p { margin: 4px 0 0; color: var(--sd-muted, #6b7f84); font-size: 11px; line-height: 1.5; }
+.office-admin-close { width: 36px; height: 36px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid var(--sd-border, var(--glass-border)); border-radius: 10px; color: var(--sd-muted, #6b7f84); background: var(--sd-surface-soft, rgba(255,255,255,.06)); cursor: pointer; transition: .18s ease; }
+.office-admin-close:hover { border-color: var(--sd-accent, var(--accent)); color: var(--sd-accent-hover, var(--accent)); background: var(--sd-accent-soft, rgba(15,118,110,.1)); }
+.office-admin-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.office-admin-body { display: grid; gap: 18px; padding: 22px 26px; }
+.office-admin-search { margin: 0; position: relative; z-index: 12; }
+.office-admin-search > label { display: block; margin-bottom: 7px; color: var(--sd-text, var(--primary-text)); font-size: 11px; font-weight: 750; }
+.office-search-field { min-height: 46px; display: flex; align-items: center; gap: 9px; padding: 0 13px; border: 1px solid var(--sd-border, var(--glass-border)); border-radius: 10px; color: var(--sd-muted, #6b7f84); background: var(--sd-surface-soft, rgba(255,255,255,.06)); transition: .18s ease; }
+.office-search-field:focus-within { border-color: var(--sd-accent, var(--accent)); color: var(--sd-accent-hover, var(--accent)); box-shadow: 0 0 0 3px rgba(15,118,110,.1); }
+.office-search-field svg { width: 17px; height: 17px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+#modalAdmin #buscadorRapidoAdmin { min-width: 0; flex: 1; padding: 0; border: 0; border-radius: 0; outline: 0; color: var(--sd-text, var(--primary-text)); background: transparent; box-shadow: none; font: inherit; font-size: 12px; }
+.office-admin-results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 10020; max-height: 210px; overflow-y: auto; }
+
+.office-current-data { padding: 15px 16px; border: 1px solid var(--sd-border, var(--glass-border)); border-radius: 11px; background: var(--sd-surface-soft, rgba(255,255,255,.04)); }
+.office-current-data h4 { margin: 0 0 12px; color: var(--sd-muted, #6b7f84); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.office-current-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.office-current-grid span, .office-current-grid strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.office-current-grid span { color: var(--sd-muted, #6b7f84); font-size: 9px; }
+.office-current-grid strong { margin-top: 4px; color: var(--sd-text, var(--primary-text)); font-size: 11px; }
+
+.office-form-panel { padding: 18px; border: 1px solid var(--sd-border, var(--glass-border)); border-radius: 12px; background: var(--sd-surface-soft, rgba(15,118,110,.04)); }
+.office-form-panel > h4 { margin: 0 0 15px; color: var(--sd-accent-hover, var(--accent)); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+#modalAdmin .office-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; margin: 0; }
+#modalAdmin .form-field { gap: 7px; }
+#modalAdmin .form-field label { font-size: 11px; font-weight: 700; }
+#modalAdmin .form-field input { min-height: 44px; padding: 0 12px; border-radius: 10px; color: var(--sd-text, var(--primary-text)); background: var(--sd-surface, rgba(255,255,255,.08)); }
+#modalAdmin .cs-trigger { min-height: 44px; padding: 10px 12px; border-width: 1px; border-radius: 10px; }
+#modalAdmin .cs-panel { z-index: 10010; border-radius: 11px; }
+#modalAdmin [data-cs-id="newDireccion"] .cs-panel { top: auto; bottom: calc(100% + 6px); }
+#modalAdmin .cs-search-wrap { padding: 8px 11px; }
+#modalAdmin .cs-options-list { max-height: 168px; padding: 5px; }
+#modalAdmin .cs-option { gap: 0; padding: 8px 10px; border-radius: 7px; }
+#modalAdmin .cs-option-sub { display: none; }
+
+.office-admin-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 17px 26px 21px; border-top: 1px solid var(--sd-border, var(--glass-border)); }
+.office-admin-actions button { min-height: 42px; padding: 0 18px; border-radius: 10px; font: inherit; font-size: 11px; font-weight: 750; cursor: pointer; transition: .18s ease; }
+.office-secondary-action { border: 1px solid var(--sd-border, var(--glass-border)); color: var(--sd-text, var(--primary-text)); background: var(--sd-surface, rgba(255,255,255,.05)); }
+.office-primary-action { min-width: 150px; border: 1px solid var(--sd-accent, var(--accent)); color: var(--sd-accent-contrast, #fff); background: var(--sd-accent, var(--accent)); }
+.office-admin-actions button:hover { transform: translateY(-1px); }
+
+@media (max-width: 680px) {
+  #modalAdmin.office-admin-overlay { align-items: flex-start; padding: 10px; overflow-y: auto; }
+  #modalAdmin .office-admin-modal { max-height: none; margin: 10px auto; overflow: visible; }
+  .office-admin-header { padding: 18px; }
+  .office-admin-heading p { display: none; }
+  .office-admin-body { padding: 18px; }
+  #modalAdmin .office-form-grid, .office-current-grid { grid-template-columns: 1fr; }
+  .office-admin-actions { position: sticky; bottom: 0; z-index: 8; padding: 14px 18px; background: var(--sd-surface, var(--glass-bg)); }
+  .office-admin-actions button { flex: 1; }
+}

@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/logo.jpg">
+  <title>Políticas | Service Desk</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/shared/service-desk-theme.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body class="module-page module-politicas">
+  <nav class="navbar">
+    <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+
+    <div class="nav-right">
+      <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span><span class="nav-text">Inicio</span>
+      </button>
+
+      <button class="btn-sistemas-nav" onclick="abrirModalSistemas()">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg></span><span class="nav-text">Gestionar sistemas</span>
+      </button>
+
+      <button id="btnPlazasWansoft" class="btn-sistemas-nav btn-plazas-nav" onclick="abrirModalPlazas()" title="Gestionar catálogo de plazas Wansoft" style="display:none">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 10v10h16V10M3 4h18l-1 6H4L3 4ZM9 20v-6h6v6"/></svg></span><span class="nav-text">Plazas Wansoft</span>
+      </button>
+
+      <button class="dark-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema">
+        <span class="theme-icon theme-icon-moon"><svg viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 9 9 0 1 0 20.5 14.2Z"/></svg></span>
+        <span class="theme-icon theme-icon-sun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>
+      </button>
+    </div>
+  </nav>
+  
+  <div class="wrap">
+
+    <div class="panel">
+      <h2>Captura de datos</h2>
+      
+      <div class="btnsTop">
+        <button class="ghost" type="button" onclick="addPage()">＋ Añadir pagina</button>
+        <button class="ghost" type="button" onclick="clearAll()">Limpiar</button>
+      </div>
+
+      <div class="forms" id="forms"></div>
+
+      <div class="btnsBottom">
+        <button class="primary" type="button" onclick="printDoc()">
+          Imprimir / Guardar PDF
+        </button>
+      </div>
+      <div class="footer">© 2026 Generador Politicas — Desarrollado por ServiceDesk</div>
+    </div>
+
+
+        <div class="doc">
+        <div class="sheets" id="sheets"></div>
+        </div>
+
+        </div>
+
+          <template id="template-form-card">
+            <div class="formCard" id="card-{{id}}">
+              <div class="formHead" style="border-bottom: 1px solid var(--line); margin-bottom: 20px; padding-bottom: 10px;">
+                <div class="title" style="font-size: 16px;">Formato {{id}}</div>
+                <div class="miniBtns">
+                  <button class="mini ghost" type="button" onclick="duplicatePage('{{id}}')">Duplicar</button>
+                  <button class="mini danger" type="button" onclick="removePage('{{id}}')">Eliminar</button>
+                </div>
+              </div>
+
+    <label>Solicitante</label>
+    <input id="in-solicitante-{{id}}" oninput="toUpper(this); syncPage('{{id}}')">
+
+    <label>Ticket</label>
+    <input id="in-ticket-{{id}}" oninput="toUpper(this); syncPage('{{id}}')">
+
+    <label>Sistema</label>
+    <select id="in-sistema-{{id}}" onchange="syncPage('{{id}}')">
+      <!-- Las opciones se generan automáticamente desde sistemas.js -->
+    </select>
+
+    <label>Nombre</label>
+    <input id="in-nombre-{{id}}" oninput="toUpper(this); syncPage('{{id}}')">
+
+    <div id="usuario-normal-{{id}}">
+      <label>Usuario</label>
+      <input id="in-usuario-{{id}}" oninput="syncPage('{{id}}')">
+    </div>
+
+    <!-- ── WANSOFT: campo de plazas ── -->
+    <div id="wansoft-fields-{{id}}" style="display:none;">
+      <label>Plaza(s) <small style="font-weight:400;opacity:.7">(busca y selecciona)</small></label>
+
+      <!-- Chips de plazas seleccionadas -->
+      <div class="plaza-chips" id="plaza-chips-{{id}}"></div>
+
+      <!-- Buscador -->
+      <div class="plaza-search-wrap">
+        <input
+          type="text"
+          class="plaza-search-input"
+          id="plaza-search-{{id}}"
+          placeholder="🔍 Buscar plaza..."
+          autocomplete="off"
+          oninput="filtrarPlazas('{{id}}')"
+          onfocus="abrirDropdownPlazas('{{id}}')"
+        >
+        <ul class="plaza-dropdown" id="plaza-dropdown-{{id}}"></ul>
+      </div>
+
+      <!-- Textarea oculto — mantiene compatibilidad con syncPage() -->
+      <textarea id="in-plazas-{{id}}" style="display:none;"></textarea>
+    </div>
+
+        <div id="usuarios-corporativos-{{id}}" class="usuarios-corp-box" style="display:none;">
+            <div class="corp-header">
+              <input type="checkbox" id="check-misma-pass-{{id}}" onchange="syncPage('{{id}}')" checked>
+              <label class="check-label">Usar la misma contraseña para las 3</label>
+            </div>
+
+        <div id="row-input-comision-{{id}}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label>Usuario Comisión</label>
+              <button class="mini danger" onclick="toggleCorpRow('{{id}}', 'comision', false)">✕ Quitar</button>
+            </div>
+            <input id="in-usuario-comision-{{id}}" oninput="syncPage('{{id}}')">
+            <div id="wrapper-pass-com-{{id}}" style="display:none;">
+              <label>Pass Comisión</label>
+              <input id="in-pass-comision-{{id}}" oninput="syncPage('{{id}}')">
+            </div>
+        </div>
+        <button id="btn-add-comision-{{id}}" class="mini ghost" style="display:none; margin-bottom:10px;" onclick="toggleCorpRow('{{id}}', 'comision', true)">+ Agregar Comisión</button>
+
+        <div id="row-input-citas-{{id}}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label>Usuario Citas Médicas</label>
+              <button class="mini danger" onclick="toggleCorpRow('{{id}}', 'citas', false)">✕ Quitar</button>
+            </div>
+            <input id="in-usuario-citas-{{id}}" oninput="syncPage('{{id}}')">
+            <div id="wrapper-pass-citas-{{id}}" style="display:none;">
+              <label>Pass Citas Médicas</label>
+              <input id="in-pass-citas-{{id}}" oninput="syncPage('{{id}}')">
+            </div>
+        </div>
+        <button id="btn-add-citas-{{id}}" class="mini ghost" style="display:none; margin-bottom:10px;" onclick="toggleCorpRow('{{id}}', 'citas', true)">+ Agregar Citas Médicas</button>
+
+        <div id="row-input-gn-{{id}}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label>Usuario Comisión GN</label>
+              <button class="mini danger" onclick="toggleCorpRow('{{id}}', 'gn', false)">✕ Quitar</button>
+            </div>
+            <input id="in-usuario-comision-gn-{{id}}" oninput="syncPage('{{id}}')">
+            <div id="wrapper-pass-gn-{{id}}" style="display:none;">
+              <label>Pass Comisión GN</label>
+              <input id="in-pass-comision-gn-{{id}}" oninput="syncPage('{{id}}')">
+            </div>
+        </div>
+        <button id="btn-add-gn-{{id}}" class="mini ghost" style="display:none;" onclick="toggleCorpRow('{{id}}', 'gn', true)">+ Agregar Comisión GN</button>
+    </div>
+
+    <div id="wrapper-pass-general-{{id}}">
+      <label>Contraseña <span id="label-pass-type-{{id}}"></span></label>
+      <input id="in-contrasena-{{id}}" oninput="syncPage('{{id}}')">
+    </div>
+  </div>
+</template>
+
+<template id="template-sheet">
+  <div class="sheet" id="sheet-{{id}}">
+    <div class="top-title">AUTOBUSES ESTRELLA BLANCA</div>
+    <div class="title-line"></div>
+    <div class="title-line"></div>
+
+    <div class="meta-row">
+      <div><span id="out-solicitante-{{id}}"></span> :</div>
+      <div id="out-fecha-{{id}}"></div>
+    </div>
+
+    <div class="body">
+      <div style="margin:12px 0">
+        En relación con la solicitud del 
+        <span class="bold">ZenDesk Ticket # <span id="out-ticket-{{id}}"></span>
+        </span>, se solicita el acceso al sistema de
+        <span class="bold" id="out-sistema-{{id}}"></span>
+        le proporcionamos la siguiente información:
+      </div>
+
+      <table class="table normal-table" id="normal-table-{{id}}" style="display:none;">
+        <thead>
+          <tr>
+            <th style="width:40%">NOMBRE</th>
+            <th style="width:20%">USUARIO</th>
+            <th style="width:20%">CONTRASEÑA</th>
+            <th style="width:20%">FIRMA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="out-nombre" style="text-align:left;padding-left:8px;"></td>
+            <td class="out-usuario"></td>
+            <td class="out-contrasena"></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="table cuentas-table" id="cuentas-table-{{id}}" style="display:none;">
+        <thead>
+          <tr>
+            <th style="width:40%">NOMBRE</th>
+            <th>TIPO</th>
+            <th style="width:20%">USUARIO</th>
+            <th style="width:20%">CONTRASEÑA</th>
+            <th style="width:20%">FIRMA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="sheet-row-comision-{{id}}">
+            <td class="out-nombre" style="text-align:left;padding-left:8px;"></td>
+            <td class="bold">COMISIÓN</td> <td class="out-usuario-comision"></td>
+            <td class="out-pass-comision"></td> 
+            <td></td>
+          </tr>
+          <tr id="sheet-row-citas-{{id}}">
+            <td class="out-nombre"></td>
+            <td class="bold">CITAS MÉDICAS</td> <td class="out-usuario-citas"></td>
+            <td class="out-pass-citas"></td> 
+            <td></td>
+          </tr>
+          <tr id="sheet-row-gn-{{id}}">
+            <td class="out-nombre"></td>
+            <td class="bold">COMISIÓN GN</td> <td class="out-usuario-comision-gn"></td>
+            <td class="out-pass-gn"></td> 
+            <td></td>
+          </tr>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="politicas-container">
+        <div style="font-size: 11px;">Al ingresar por primera vez se les desplegará una pantalla en donde deberá cambiar su contraseña por razones de seguridad.</div>
+        <div style="margin-top:5px;font-size:11px;">Sin más por el momento, quedamos a sus órdenes para cualquier aclaración.</div>
+        <div class="sign-block">
+          <div>Atentamente</div>
+          <div><b>Atención IT a Usuarios.</b></div>
+          <div>Dirección de informática.</div>
+          <div> -------------------------------------------------------------------------</div>
+        </div>
+        <div class="divider"></div>
+        <div class="pol-title">Políticas de Seguridad (Acceso Sistemas de Información)</div>
+        <div class="pol-text">
+          La información de la Empresa es uno de los activos más importantes para las operaciones diarias de la misma. Parte de la información es confidencial y como usuario comparte la responsabilidad de protegerla. Para contribuir a la protección de la información y del sistema se incorpora un conjunto de reglas de seguridad en los sistemas de información que el usuario debe seguir.      <br><br>
+      El acceso a la información contenido en los equipos informáticos se otorga o revoca de acuerdo al área de trabajo de cada persona y
+      del entorno de la información que requiera. El acceso a la información en los equipos informáticos deberá ser requerido a través de un
+      escrito firmado por el Gerente o Director del área. Los usuarios otorgados para el ingreso a los Sistemas de información son de uso personal,
+      por lo que no debe haber razón alguna para que una persona se firme en el sistema con un usuario diferente al propio. Los usuarios deben finalizar
+      su sesión cuando abandonen su estación de trabajo. El sistema desconectará en forma automática, cuando los usuarios que no utilicen su sesión durante
+      un periodo de 30 minutos. Las personas que no utilicen su usuario por un periodo mayor a 30 días serán deshabilitados para ingresar al sistema, para ser
+      habilitados deben solicitarlo al área de Seguridad, la cual les otorgará una contraseña nueva, previa autenticación del usuario. Las personas que no utilicen
+      su usuario por un periodo mayor a 90 días serán dados de baja del sistema y para su reingreso deben solicitar el acceso como usuarios nuevos. La persona que
+      haga mal uso de su usuario será sancionado con la cancelación del mismo notificando al Gerente o Director del área el motivo de la cancelación y lo que resulte.
+      <br><br>
+      El mal uso de los accesos que le sean otorgados para el acceso a la información personal y confidencial contenida en los sistemas de información, puede incluso
+      hacerlo acreedor a un delito Federal por lo establecido en
+      <strong>La Ley Federal de Protección de Datos Personales en Posesión de los Particulares</strong>, vigente.
+        <div class="pol-title" style="margin-top:10px;">Políticas de Contraseña</div>
+
+    <div class="pol-text">
+      Todos los usuarios que ingresen por primera vez al sistema deberán cambiar su contraseña. Todos los usuarios deberán cambiar su contraseña cada 30 días.
+      La longitud de la contraseña será como mínimo de 5 caracteres y como máximo de 10 caracteres. La contraseña no deberá contener dígitos adyacentes, caracteres
+      repetidos consecutivamente, ni contener el carácter “@”. Al cambiar la contraseña, ésta no deberá ser igual a las últimas 32 contraseñas anteriores. Teclee
+      cuidadosamente el usuario y la contraseña, si la específica incorrectamente 3 veces consecutivas el sistema inhabilitará el perfil de usuario para iniciar la sesión.
+      <br><br>
+      Los sistemas de información están pensados para hacer nuestro trabajo más fácil y para mejorar el rendimiento de nuestro negocio. Las Políticas de Seguridad deben ayudarle,
+      si tiene alguna pregunta o sugerencia póngase en contacto con el Área de Service Desk al teléfono 5514005215 o al Área de Tecnología y Seguridad TI a los teléfonos 5514004514
+    </div>
+
+      <div class="footer-line"></div>
+      <div class="footer-note">Nombre y Firma de quién autoriza.</div>
+    </div>
+  </div>
+</template>
+
+
+  <!-- ============================================================
+       MODAL — GESTIÓN DE SISTEMAS
+       ============================================================ -->
+  <div class="modal-overlay" id="modalSistemas">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>⚙️ Gestionar sistemas</h3>
+        <button class="modal-close" onclick="cerrarModalSistemas()" title="Cerrar">✕</button>
+      </div>
+
+      <!-- Lista de sistemas actuales -->
+      <div class="sistemas-list" id="sistemasList"></div>
+
+      <!-- Formulario para agregar -->
+      <div class="add-sistema-form">
+        <input type="text" id="nuevoSistemaNombre" placeholder="Nombre del sistema" maxlength="40"
+               onkeydown="if(event.key==='Enter') agregarSistema()">
+
+        <div class="tipo-toggle">
+          <input type="radio" name="nuevoTipo" id="tipoNormal" value="normal" checked>
+          <label for="tipoNormal">Normal</label>
+          <input type="radio" name="nuevoTipo" id="tipoCorp" value="corporativo">
+          <label for="tipoCorp">Corporativo</label>
+        </div>
+
+        <button class="btn-add-sistema" onclick="agregarSistema()" title="Agregar sistema">＋</button>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-restaurar" onclick="restaurarSistemas()">↺ Restaurar predeterminados</button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="sistemas-count" id="sistemasCount"></span>
+          <button id="btnGuardarGitHub" class="btn-guardar-gh" onclick="guardarCambiosSistemas()" disabled>
+            💾 Guardar en GitHub
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- TEMPLATE WANSOFT v11 -->
+<template id="template-sheet-wansoft">
+<div class="sheet ws-sheet" id="sheet-wansoft-{{id}}">
+
+  <!-- ── Columna izquierda: franja verde del PDF ── -->
+  <div class="ws-col-sidebar">
+    <img src="data:image/webp;base64,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" alt="" class="ws-sidebar-img">
+  </div>
+
+  <!-- ── Columna derecha: contenido ── -->
+  <div class="ws-col-content">
+
+    <!-- Logo: GRUPO / Estrella Blanca -->
+    <div class="ws-logo-wrap">
+      <img src="data:image/webp;base64,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" alt="Grupo Estrella Blanca" class="ws-logo">
+    </div>
+    
+    <!-- Fecha: derecha, cursiva negrita -->
+    <p class="ws-p ws-fecha"><em><strong id="ws-out-fecha-{{id}}"></strong></em></p>
+
+    <!-- Presente -->
+    <p class="ws-p ws-presente">Presente: <span id="ws-out-solicitante-{{id}}"></span></p>
+
+    <!-- Párrafo de referencia -->
+    <p class="ws-p ws-ref">En relación con la solicitud del <strong>Ticket #<span id="ws-out-ticket-{{id}}"></span>,</strong> se solicita el acceso al sistema de <strong>Wansoft</strong> para Los Senderos<strong>,</strong> le proporcionamos la siguiente información:</p>
+
+    <!-- Tabla -->
+    <table class="ws-tabla">
+      <thead><tr>
+        <th>NOMBRE</th><th>PLAZA</th><th>USUARIO</th><th>CONTRASEÑA</th><th>FIRMA</th>
+      </tr></thead>
+      <tbody><tr>
+        <td id="ws-out-nombre-{{id}}"></td>
+        <td id="ws-out-plazas-{{id}}" class="ws-td-plaza"></td>
+        <td id="ws-out-usuario-{{id}}"></td>
+        <td id="ws-out-contrasena-{{id}}"></td>
+        <td></td>
+      </tr></tbody>
+    </table>
+
+    <!-- Notas grandes centradas -->
+    <p class="ws-p ws-nota">Al ingresar por primera vez deberá de cambiar su contraseña por razones de seguridad.</p>
+    <p class="ws-p ws-nota">Sin más por el momento, quedamos a sus órdenes para cualquier aclaración.</p>
+
+    <!-- Bloque Atentamente -->
+    <div class="ws-it">
+      <p class="ws-p">Atentamente</p>
+      <p class="ws-p"><strong>Atención IT a Usuarios.</strong></p>
+      <p class="ws-p">Dirección de informática.</p>
+    </div>
+
+    <!-- Separador de guiones -->
+    <p class="ws-sep">----------------------------------------------------------------------</p>
+
+    <!-- Políticas de Seguridad -->
+    <p class="ws-pol-h"><strong>Políticas de Seguridad (Acceso Sistemas de Información)</strong></p>
+    <p class="ws-pol-p">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;La información de la Empresa es uno de los activos más importantes para las operaciones diarias de la misma. Parte de la información es confidencial y como usuario comparte la responsabilidad de protegerla. Para contribuir a la protección de la información y del sistema se incorpora un conjunto de reglas de seguridad en los sistemas de información que el usuario debe seguir.</p>
+    <p class="ws-pol-p">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;El acceso a la información contenido en los equipos informáticos se otorga o revoca de acuerdo con el área de trabajo de cada persona y del entorno de la información que requiera. El acceso a la información en los equipos informáticos deberá ser requerido a través de un escrito firmado por el Gerente o Director del área. Los usuarios otorgados para el ingreso a los Sistemas de información son de uso personal, por lo que no debe haber razón alguna para que una persona se firme en el sistema con un usuario diferente al propio. Los usuarios deben finalizar su sesión cuando abandonen su estación de trabajo. El sistema desconectará en forma automática, cuando los usuarios que no utilicen su sesión durante un periodo de 30 minutos. Las personas que no utilicen su usuario por un periodo mayor a 30 días serán deshabilitadas para ingresar al sistema, para ser habilitados deben solicitarlo al área de Seguridad, la cual les otorgará una contraseña nueva, previa autenticación del usuario. Las personas que no utilicen su usuario por un periodo mayor a 90 días serán dados de baja del sistema y para su reingreso deben solicitar el acceso como usuarios nuevos. La persona que haga mal uso de su usuario será sancionada con la cancelación del mismo notificando al Gerente o Director del área el motivo de la cancelación y lo que resulte.</p>
+    <p class="ws-pol-p">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;El mal uso de los accesos que le sean otorgados para el acceso a la información personal y confidencial contenida en los sistemas de información, puede incluso hacerlo acreedor a un delito Federal por lo establecido en <strong>La Ley Federal de Protección de Datos Personales en Posesión de los Particulares</strong>, vigente.</p>
+
+    <p class="ws-pol-h"><strong>Políticas de Contraseña</strong></p>
+    <p class="ws-pol-p">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Todos los usuarios que ingresen por primera vez al sistema deberán cambiar su contraseña. Todos los usuarios deberán cambiar su contraseña cada 30 días. La longitud de la contraseña será como mínimo de 5 caracteres y como máximo de 10 caracteres. La contraseña no deberá contener dígitos adyacentes, caracteres repetidos consecutivamente, ni contener el carácter "@". Al cambiar la contraseña, ésta no deberá ser igual a las últimas 32 contraseñas anteriores. Teclee cuidadosamente el usuario y la contraseña, si la específica incorrectamente 3 veces consecutivas el sistema inhabilitará el perfil de usuario para iniciar la sesión.</p>
+    <p class="ws-pol-p">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Los sistemas de información están pensados para hacer nuestro trabajo más fácil y para mejorar el rendimiento de nuestro negocio. Las Políticas de Seguridad deben ayudarle, si tiene alguna pregunta o sugerencia póngase en contacto con el Área de Service Desk al teléfono 55 5729 0890.</p>
+
+    <!-- Firmas finales -->
+    <div class="ws-firmas">
+      <div class="ws-firma">
+        <div class="ws-firma-line"></div>
+        <p class="ws-p"><strong>Nombre y Firma</strong></p>
+        <p class="ws-p"><strong>Gerente Regional</strong></p>
+      </div>
+      <div class="ws-firma">
+        <div class="ws-firma-line"></div>
+        <p class="ws-p"><strong>Nombre</strong></p>
+        <p class="ws-p"><strong>Vo Bo</strong></p>
+      </div>
+    </div>
+
+  </div><!-- /.ws-col-content -->
+</div><!-- /.ws-sheet -->
+</template>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       MODAL — GESTIONAR PLAZAS WANSOFT
+  ══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalPlazas">
+    <div class="modal-box modal-box-plazas">
+      <div class="modal-header">
+        <h3>🏪 Plazas Wansoft</h3>
+        <button class="modal-close" onclick="cerrarModalPlazas()" title="Cerrar">✕</button>
+      </div>
+
+      <!-- Importar Excel -->
+      <div class="plazas-import-zone" id="plazasImportZone">
+        <div class="plazas-import-icon">📂</div>
+        <p class="plazas-import-label">Arrastra un <strong>.xlsx</strong> o haz clic para importar</p>
+        <p class="plazas-import-sub">Las plazas de la primera columna se cargarán automáticamente</p>
+        <input type="file" id="plazasFileInput" accept=".xlsx,.xls" style="display:none"
+               onchange="importarExcelPlazas(this)">
+        <button class="btn-import-excel" onclick="document.getElementById('plazasFileInput').click()">
+          📥 Seleccionar Excel
+        </button>
+      </div>
+
+      <!-- Buscador dentro del modal -->
+      <div class="plazas-modal-search-wrap">
+        <input type="text" id="plazasModalSearch" class="plaza-search-input"
+               placeholder="🔍 Filtrar plazas del catálogo..."
+               oninput="renderListaPlazasModal()">
+      </div>
+
+      <!-- Lista de plazas -->
+      <div class="plazas-modal-list" id="plazasModalList"></div>
+
+      <!-- Agregar manualmente -->
+      <div class="plazas-add-row">
+        <input type="text" id="nuevaPlazaInput" class="plazas-add-input"
+               placeholder="Escribir plaza manualmente..."
+               onkeydown="if(event.key==='Enter') agregarPlazaCatalogo()">
+        <button class="btn-add-plaza" onclick="agregarPlazaCatalogo()" title="Agregar">＋</button>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-restaurar" onclick="restaurarPlazasPredeterminadas()">↺ Restaurar predeterminadas</button>
+        <span class="sistemas-count" id="plazasCount"></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="sistemas.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

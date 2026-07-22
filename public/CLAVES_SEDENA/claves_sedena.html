@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="/logo.jpg">
+  <title>Cuentas Corporativas | Service Desk</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/shared/service-desk-theme.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script type="module" src="script.js"></script>
+</head>
+<body class="module-page module-sedena">
+
+  <nav class="navbar">
+    <div class="logo">Service<span style="color: var(--accent);">Desk</span></div>
+
+    <div class="nav-right">
+      <button class="nav-btn-header" onclick="toggleFormularioAdmin()">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="nav-text">Administrar oficinas</span>
+      </button>
+      <button class="nav-btn-header" onclick="window.location.href='/dashboard'">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span><span class="nav-text">Inicio</span>
+      </button>
+      <button class="dark-toggle" onclick="toggleDarkMode()" id="themeBtn" aria-label="Activar modo oscuro">
+        <span class="theme-icon theme-icon-moon"><svg viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 9 9 0 1 0 20.5 14.2Z"/></svg></span>
+        <span class="theme-icon theme-icon-sun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>
+      </button>
+    </div>
+  </nav>
+
+  <header>
+    <h1>Generador de Claves Corporativas</h1>
+    <p class="subtitle">Crea usuarios y contraseñas automáticamente para cuentas corporativas y citas médicas</p>
+  </header>
+
+<div id="modalAdmin" class="modal-overlay" 
+     style="display:none; 
+            position: fixed; 
+            top:0; 
+            left:0; 
+            width:100%; 
+            height:100%; 
+            background: rgba(0,0,0,0.6); /* Bajamos un poco la oscuridad para que luzca el blur */
+            z-index:9999; 
+            justify-content:center; 
+            align-items:center; 
+            backdrop-filter: blur(8px); /* ESTO crea el efecto nublado */
+            -webkit-backdrop-filter: blur(8px);">
+
+    <div class="modal-content-custom" 
+         style="background: var(--glass-bg); 
+                padding: 30px; 
+                border-radius: 25px; /* Bordes más redondeados como el ejemplo */
+                width: 90%; 
+                max-width: 600px; 
+                border: 1px solid var(--glass-border);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.4); /* Sombra para dar profundidad */">
+        
+        <h3 style="margin-bottom: 20px; color: var(--primary-text);">⚙️ Panel de Administración SEDENA</h3>
+        
+        <div style="margin: 15px 0; position: relative;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary-text);">Busca una oficina para editar:</label>
+            
+            <input type="text" id="buscadorSedena" oninput="filtrarAdminOficinas(this.value)" placeholder="Escribe nombre, número o nomenclatura..." autocomplete="off" 
+                style="width:100%; padding:12px; background:rgba(255,255,255,0.1); color:inherit; border:1px solid var(--glass-border); border-radius:12px; outline:none;">
+            
+            <div id="sugerenciasSedena" style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--glass-bg); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid var(--glass-border); border-radius:12px; max-height:200px; overflow-y:auto; z-index:1000; box-shadow: var(--shadow); margin-top: 5px;"></div>
+            
+            <button type="button" onclick="limpiarAdminForm()" style="margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: inherit; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: 0.3s;">
+                ✨ Crear Nueva Oficina (Limpiar)
+            </button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top: 20px;">
+            <input type="text" id="admNumero" placeholder="Número Oficina" class="modal-input" style="padding:10px; border-radius:8px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.05); color:inherit;">
+            <input type="text" id="admNomen" placeholder="Nomenclatura" class="modal-input" style="padding:10px; border-radius:8px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.05); color:inherit;">
+            <input type="text" id="admNombre" placeholder="Nombre de Agencia" style="grid-column: span 2; padding:10px; border-radius:8px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.05); color:inherit;" class="modal-input">
+            <select id="admEstatus" class="modal-input" style="grid-column: span 2; padding:10px; border-radius:8px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.2); color:inherit;">
+                <option value="ACTIVA" style="background:#2d3436;">ACTIVA</option>
+                <option value="INACTIVA" style="background:#2d3436;">INACTIVA</option>
+            </select>
+        </div>
+
+        <div style="margin-top:25px; text-align:right; display: flex; justify-content: flex-end; gap: 10px;">
+            <button onclick="toggleFormularioAdmin()" style="padding:10px 20px; background:none; color:inherit; border:1px solid var(--glass-border); border-radius:8px; cursor:pointer;">Cancelar</button>
+            <button id="btnGuardarSedena" onclick="guardarCambiosSedena()" style="padding:10px 20px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">💾 Guardar en GitHub</button>
+        </div>
+    </div>
+</div>
+
+
+
+  <main class="container fade-in">
+    <div class="card" role="region" aria-labelledby="cardTitle">
+      <h2 id="cardTitle" class="visually-hidden">Formulario de generación</h2>
+
+      <div id="loaderBar" class="loader-row">
+        <div id="loadStatus" class="status-message">Iniciando...</div>
+        <div id="spinner" class="spinner" aria-hidden="true"></div>
+      </div>
+
+      <form id="generator" novalidate>
+
+        <fieldset>
+          <legend class="sr-only">Selección de agencia</legend>
+
+          <div style="position: relative;">
+            <label for="officeSearch">Buscar agencia:</label>
+            <input id="officeSearch" type="text" placeholder="Escribe nombre, número o nomenclatura..." autocomplete="off" />
+            
+            <div id="sugerenciasPrincipal" class="caja-sugerencias"></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="row">
+          <legend class="sr-only">Datos del usuario</legend>
+
+          <div>
+            <label for="curpInput">CURP del usuario</label>
+            <input id="curpInput" name="curp" type="text" maxlength="18"
+              placeholder="Ej: MAAR251024MMNRRTA3" inputmode="text" aria-describedby="curpHelp" />
+            <div id="curpHelp" class="helper"></div>
+          </div>
+
+          <div>
+            <label for="nameInput">Nombre completo del usuario</label>
+            <input id="nameInput" name="nombre" type="text"
+              placeholder="Ej: RUTH MARIA ARNAIZ" aria-describedby="nameHelp" />
+            <div id="nameHelp" class="helper"></div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button id="generate" class="primary" type="button" disabled>Generar</button>
+          <button id="copyAll" class="ghost" type="button">Copiar fila CSV</button>
+          <button id="downloadCsv" class="ghost" type="button">Descargar CSV</button>
+          <button id="clearBtn" class="ghost" type="button">Limpiar</button>
+          <button class="warning" type="button" onclick="irAPoliticasSedena()">Generar políticas</button>
+        </div>
+
+        <hr />
+
+        <div class="output" id="outputArea" hidden>
+
+          <div class="field">
+            <div class="small">Usuario (Corporativo)</div>
+            <div id="outUser" class="generated"></div>
+          </div>
+
+          <div class="field">
+            <div class="small">Contraseña (Corporativa)</div>
+            <div id="outPassDuplicate1" class="generated"></div>
+          </div>
+
+          <div class="field citas-field">
+            <div class="small">Usuario (Citas Médicas)</div>
+            <div id="outCitasUser" class="generated"></div>
+          </div>
+
+          <div class="field citas-field">
+            <div class="small">Contraseña (Citas Médicas)</div>
+            <div id="outPassDuplicate2" class="generated"></div>
+          </div>
+
+          <div class="field gn-field">
+            <div class="small">Usuario GN</div>
+            <div id="outGNUser" class="generated"></div>
+          </div>
+
+          <div class="field gn-field">
+            <div class="small">Contraseña (GN)</div>
+            <div id="outPassDuplicate3" class="generated"></div>
+          </div>
+
+          <div class="field info-field">
+            <div class="small">Oficina (Número)</div>
+            <div id="outOffice" class="generated"></div>
+          </div>
+
+          <div class="field info-field">
+            <div class="small">Nomenclatura (3 letras)</div>
+            <div id="outNomen" class="generated"></div>
+          </div>
+
+          <div class="field full-width">
+            <div class="small">Descripción (Nombre Completo)</div>
+            <div id="outDesc" class="generated"></div>
+          </div>
+
+          <!-- Hidden (para export/copiar) -->
+          <div id="outPass" hidden></div>
+          <div id="outConfirm" hidden></div>
+        </div>
+
+    
+
+      </form>
+    </div>
+  </main>
+
+   <footer>
+       © 2026 Generador Profesional — Desarrollado por ServiceDesk
+    </footer>
+
+
+<script>
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      // CAMBIO: Usamos 'sedena-theme' para que no choque con el Dashboard
+      localStorage.setItem('sedena-theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeBtn').setAttribute('aria-label', isDark ? 'Activar modo claro' : 'Activar modo oscuro');
+    }
+
+    // Leemos específicamente la configuración de SEDENA al cargar
+    if (localStorage.getItem('sedena-theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      document.getElementById('themeBtn').setAttribute('aria-label', 'Activar modo claro');
+    }
+  </script>
+</body>
+</html>

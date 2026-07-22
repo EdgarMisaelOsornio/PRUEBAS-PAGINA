@@ -1,0 +1,36 @@
+[
+  {
+    "nombre": "MAX",
+    "correos": [
+      "lilia.inclan.max@gmail.com",
+      "lilia.garcia@max-signage.mx",
+      "carmen@avpoint.com.mx",
+      "oscar.rivero.lorenzo@gmail.com"
+    ]
+  },
+  {
+    "nombre": "TECNOMANIA",
+    "correos": [
+      "diego@tecnomania.com.mx",
+      "Ds@tecnomania.com.mx",
+      "omar@tecnomania.com.mx"
+    ]
+  },
+  {
+    "nombre": "MAGIC",
+    "correos": [
+      "hebe@leafmagicav.com",
+      "aimee.sanchez@leafmagicav.com",
+      "desing@leafmagicav.com"
+    ]
+  },
+  {
+    "nombre": "STRATECH",
+    "correos": [
+      "soporte@stratech.digital",
+      "nolvera@stratech.digital",
+      "jcruz@stratech.digital",
+      "eposada@stratech.digital"
+    ]
+  }
+]

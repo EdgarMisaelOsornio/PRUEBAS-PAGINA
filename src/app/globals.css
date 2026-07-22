@@ -1,0 +1,7 @@
+:root { color-scheme: light; --background: #f3f6f7; --foreground: #12252b; }
+html, body { max-width: 100vw; min-height: 100%; overflow-x: hidden; }
+body { margin: 0; color: var(--foreground); background: var(--background); font-family: var(--font-geist-sans), 'Segoe UI', Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+* { box-sizing: border-box; padding: 0; margin: 0; }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; }
+::selection { color: #fff; background: #0f766e; }
